@@ -10,14 +10,17 @@
 
 
 /*Seteamos la direccion local de nuestra interfaz mediante getaddrinfo*/
-/*Devuelve false si hubo algun error. True en caso contrario.*/
+/*En caso de que algo falle devuelve false. True en caso contrario.*/
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service);
 
 /*Crea servidor a partir del socket y la informacion brindada por server_info. */
 /*Bindea y aplica listen sobre el socket para ser el "pasivo".*/
-/*Aplica accept y crea nuevo socket. */
 /*En caso de que algo falle devuelve false. True en caso contrario.*/
-bool bind_and_listen(socket_t *s, struct addrinfo *server_info, socket_t *new_s);
+bool bind_and_listen(socket_t *s, struct addrinfo *server_info);
+
+/* Aplica accept y crea nuevo socket. */
+/*En caso de que algo falle devuelve false. True en caso contrario.*/
+bool server_accept(socket_t *s, socket_t *client_s);
 
 /*Recibe un service a partir del cual se creara una conexion*/
 /*Las conexiones creadas son cerradas al final.*/ 

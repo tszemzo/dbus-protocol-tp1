@@ -29,7 +29,7 @@ bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, co
 	return true;
 }
 
-bool bind_and_listen(socket_t *s, struct addrinfo *server_info, socket_t *new_s) {
+bool bind_and_listen(socket_t *s, struct addrinfo *server_info) {
 	if (!socket_create(s, server_info)) {
 		printf("Error: %s\n", strerror(errno));
       	freeaddrinfo(server_info);
@@ -43,25 +43,26 @@ bool bind_and_listen(socket_t *s, struct addrinfo *server_info, socket_t *new_s)
 	}
 	printf("Socket binded and ready for accept..\n");
 
-	if (!socket_accept(s, new_s)) {
-		printf("Error: %s\n", strerror(errno));
-		return false;
-	}
-	
 	return true;
 }
 
+bool server_accept(socket_t *s, socket_t *client_s) {
+	if (!socket_accept(s, client_s)) {
+		printf("Error: %s\n", strerror(errno));
+		return false;
+	}
+	return true;
+}
 
 bool create_server(const char *service) {
 	struct addrinfo hints;
    	struct addrinfo *server_info;
+   	socket_t s;
+	socket_t client_s;
 
    	if (!set_local_address(&hints, &server_info, service)) return ERROR;
-
-   	socket_t s;
-	socket_t new_s;
-
-	if (!bind_and_listen(&s, server_info, &new_s)) return ERROR;
+	if (!bind_and_listen(&s, server_info)) return ERROR;
+	if (!server_accept(&s, &client_s)) return ERROR;
 
 	return SUCCESS;
 }
