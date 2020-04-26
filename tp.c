@@ -6,9 +6,10 @@
 
 #define SUCCESS 0
 #define ERROR 1
+#define PORT "8080"
 
 int main(int argc, char *argv[]) {
 
-	create_server("8080");
+	create_server(PORT);
 	return SUCCESS;
 }

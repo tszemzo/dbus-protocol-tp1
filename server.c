@@ -9,7 +9,6 @@
 
 #define SUCCESS 0
 #define ERROR 1
-#define PORT "8080"
 #define ACCEPT_QUEUE_LENGTH 10
 
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service) {
@@ -43,6 +42,12 @@ bool bind_and_listen(socket_t *s, struct addrinfo *server_info, socket_t *new_s)
 		return false;
 	}
 	printf("Socket binded and ready for accept..\n");
+
+	if (!socket_accept(s, new_s)) {
+		printf("Error: %s\n", strerror(errno));
+		return false;
+	}
+	
 	return true;
 }
 

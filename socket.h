@@ -27,7 +27,10 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_que
 
 // int socket_connect(socket_t *self, char* hostname, char* service);
 
-// int socket_accept(socket_t *self, socket_t *accepted_socket);
+/* Extrae la primera conexion de la cola de conexiones pendientes de nuestro socket pasivo */
+/* Crea un nuevo socket conectado y devuelve su fd que referencia a ese socket */
+/* Devuelve verdadero en caso de exito, falso si no. */
+bool socket_accept(socket_t *self, socket_t *accepted_socket);
 
 // void socket_shutdown(socket_t *self);
 

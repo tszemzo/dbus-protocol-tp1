@@ -33,3 +33,11 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_que
 
     return true;
 }
+
+bool socket_accept(socket_t *self, socket_t *new_socket) {
+	new_socket->fd = accept(self->fd, NULL, NULL);
+	if ( new_socket->fd == -1) return false;
+
+	printf("Accepting socket fd...%d\n", new_socket->fd);
+	return true;
+}
