@@ -1,6 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include "socket.h"
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -10,11 +11,17 @@
 
 /*Seteamos la direccion local de nuestra interfaz mediante getaddrinfo*/
 /*Devuelve false si hubo algun error. True en caso contrario.*/
-bool set_local_address(struct addrinfo *hints, struct addrinfo **ptr, const char *service);
+bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service);
+
+/*Crea servidor a partir del socket y la informacion brindada por server_info. */
+/*Bindea y aplica listen sobre el socket para ser el "pasivo".*/
+/*Aplica accept y crea nuevo socket. */
+/*En caso de que algo falle devuelve false. True en caso contrario.*/
+bool bind_and_listen(socket_t *s, struct addrinfo *server_info, socket_t *new_s);
 
 /*Recibe un service a partir del cual se creara una conexion*/
 /*Las conexiones creadas son cerradas al final.*/ 
 /*En caso de errores devuelve 1. 0 en caso contrario.*/ 
-int create_server(const char *service);
+bool create_server(const char *service);
 
 #endif // SERVER_H

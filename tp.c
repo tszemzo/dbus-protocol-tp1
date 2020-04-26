@@ -1,3 +1,4 @@
+#include "socket.h"
 #include "server.h"
 #include <stdio.h>
 #include <string.h>
