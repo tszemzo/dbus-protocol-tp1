@@ -10,6 +10,7 @@
 #define SUCCESS 0
 #define ERROR 1
 #define ACCEPT_QUEUE_LENGTH 10
+#define MAX_CHUNKS_SIZE 32
 
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service) {
 

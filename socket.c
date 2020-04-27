@@ -34,6 +34,24 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_que
     return true;
 }
 
+bool socket_receive(socket_t *self, char* buffer, size_t buffer_size,
+	int *received_bytes, int *accum_bytes) {
+
+	while (*accum_bytes < buffer_size) {
+  	 	*received_bytes = recv(self->fd, &buffer[*accum_bytes], buffer_size - *accum_bytes, MSG_NOSIGNAL);
+  	 		if (*received_bytes == 0) {
+  	 			*received_bytes = -1;
+  	 			break;
+  	 		}
+  	 		if (*received_bytes < 0) {
+				printf("Error: %s\n", strerror(errno));
+				return false;
+			}
+			*accum_bytes += *received_bytes;
+	}
+	return true;
+}
+
 bool socket_accept(socket_t *self, socket_t *new_socket) {
 	new_socket->fd = accept(self->fd, NULL, NULL);
 	if ( new_socket->fd == -1) return false;

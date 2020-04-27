@@ -25,12 +25,17 @@ bool socket_create(socket_t *self, struct addrinfo *ptr);
 /* Devuelve verdadero en caso de exito, falso si no. */
 bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_queue_length);
 
-// int socket_connect(socket_t *self, char* hostname, char* service);
-
 /* Extrae la primera conexion de la cola de conexiones pendientes de nuestro socket pasivo */
 /* Crea un nuevo socket conectado y devuelve su fd que referencia a ese socket */
 /* Devuelve verdadero en caso de exito, falso si no. */
 bool socket_accept(socket_t *self, socket_t *accepted_socket);
+
+/* Recibe data de la conexion establecida con el socket.*/
+/* Luego, la almacena en el data_buffer. */
+/* Devuelve verdadero en caso de haber recibido todo la data, falso si no. */
+bool socket_receive(socket_t *self, char* buffer, size_t buffer_size, int *received_bytes, int *accum_bytes);
+
+// int socket_connect(socket_t *self, char* hostname, char* service);
 
 // void socket_shutdown(socket_t *self);
 
