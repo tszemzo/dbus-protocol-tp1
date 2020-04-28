@@ -63,13 +63,20 @@ bool receive_message(socket_t *s) {
   	while (received_bytes >= 0) {
   	 	memset(buffer, 0, CHUNK_SIZE); 
   	 	received_bytes = 0;
-  	 	// Leeme CHUNK_SIZE bytes y storeamelos en buffer suppose
+  	 	// Leeme CHUNK_SIZE bytes y storeamelos en buffer
   	 	if(!socket_receive(s, buffer, CHUNK_SIZE, &received_bytes)) return false;
   	}
   	return true;
 }
 
-bool create_server(const char *service) {
+void server_destroy(socket_t *s, socket_t *client_s) {
+	socket_shutdown(client_s);
+  	socket_destroy(client_s);
+  	socket_shutdown(s);
+  	socket_destroy(s);
+}
+
+bool server_run(const char *service) {
 	struct addrinfo hints;
    	struct addrinfo *server_info;
    	socket_t s;
@@ -83,10 +90,6 @@ bool create_server(const char *service) {
 		return ERROR;
 	}
 
-	socket_shutdown(&client_s);
-  	socket_destroy(&client_s);
-  	socket_shutdown(&s);
-  	socket_destroy(&s);
-
+	server_destroy(&s, &client_s);
 	return SUCCESS;
 }

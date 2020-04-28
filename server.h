@@ -25,6 +25,9 @@ bool server_accept(socket_t *s, socket_t *client_s);
 /*Recibe un service a partir del cual se creara una conexion*/
 /*Las conexiones creadas son cerradas al final.*/ 
 /*En caso de errores devuelve 1. 0 en caso contrario.*/ 
-bool create_server(const char *service);
+bool server_run(const char *service);
+
+/*Destruye los sockets asociados al servidor y cierra las conexiones.*/ 
+void server_destroy(socket_t *s, socket_t *client_s);
 
 #endif // SERVER_H
