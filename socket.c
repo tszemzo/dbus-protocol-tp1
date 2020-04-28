@@ -2,11 +2,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 bool socket_create(socket_t *self, struct addrinfo *ptr) {
 	self->fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 	if (self->fd == -1) return false;
 	return true;
+}
+
+void socket_destroy(socket_t *self) {
+	close(self->fd);
+}
+
+void socket_shutdown(socket_t *self) { 
+	shutdown(self->fd, SHUT_RDWR); 
 }
 
 bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_queue_length){
@@ -35,20 +44,24 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_que
 }
 
 bool socket_receive(socket_t *self, char* buffer, size_t buffer_size,
-	int *received_bytes, int *accum_bytes) {
+	int *received_bytes) {
 
-	while (*accum_bytes < buffer_size) {
-  	 	*received_bytes = recv(self->fd, &buffer[*accum_bytes], buffer_size - *accum_bytes, MSG_NOSIGNAL);
-  	 		if (*received_bytes == 0) {
-  	 			*received_bytes = -1;
-  	 			break;
-  	 		}
-  	 		if (*received_bytes < 0) {
-				printf("Error: %s\n", strerror(errno));
-				return false;
-			}
-			*accum_bytes += *received_bytes;
+	printf("Empiezo a recibir:\n");
+	int accum_bytes = 0;
+	while (accum_bytes < buffer_size) {
+		printf("Accum %d bytes\n", accum_bytes);
+  	 	*received_bytes = recv(self->fd, &buffer[accum_bytes], buffer_size - accum_bytes, MSG_NOSIGNAL);
+  	 	if (*received_bytes == 0) {
+  	 		*received_bytes = -1;
+  	 		break;
+  	 	}
+  	 	if (*received_bytes < 0) {
+			printf("Error: %s\n", strerror(errno));
+			return false;
+		}
+		accum_bytes += *received_bytes;
 	}
+	printf("Recibido %d bytes: %s\n", accum_bytes, buffer);
 	return true;
 }
 

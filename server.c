@@ -10,7 +10,7 @@
 #define SUCCESS 0
 #define ERROR 1
 #define ACCEPT_QUEUE_LENGTH 10
-#define MAX_CHUNKS_SIZE 32
+#define CHUNK_SIZE 32
 
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service) {
 
@@ -55,6 +55,20 @@ bool server_accept(socket_t *s, socket_t *client_s) {
 	return true;
 }
 
+bool receive_message(socket_t *s) {
+	char buffer[CHUNK_SIZE];
+   	int received_bytes = 0;
+
+   	// Mientras haya conexion
+  	while (received_bytes >= 0) {
+  	 	memset(buffer, 0, CHUNK_SIZE); 
+  	 	received_bytes = 0;
+  	 	// Leeme CHUNK_SIZE bytes y storeamelos en buffer suppose
+  	 	if(!socket_receive(s, buffer, CHUNK_SIZE, &received_bytes)) return false;
+  	}
+  	return true;
+}
+
 bool create_server(const char *service) {
 	struct addrinfo hints;
    	struct addrinfo *server_info;
@@ -64,6 +78,15 @@ bool create_server(const char *service) {
    	if (!set_local_address(&hints, &server_info, service)) return ERROR;
 	if (!bind_and_listen(&s, server_info)) return ERROR;
 	if (!server_accept(&s, &client_s)) return ERROR;
+
+	if (!receive_message(&client_s)){
+		return ERROR;
+	}
+
+	socket_shutdown(&client_s);
+  	socket_destroy(&client_s);
+  	socket_shutdown(&s);
+  	socket_destroy(&s);
 
 	return SUCCESS;
 }

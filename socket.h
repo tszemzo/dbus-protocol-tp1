@@ -15,8 +15,11 @@ typedef struct socket_t {
 /* Devuelve verdadero en caso de exito, falso si no. */
 bool socket_create(socket_t *self, struct addrinfo *ptr);
 
-/* Destruye el socket .*/
-// void socket_close(socket_t *self);
+/* Destruye el socket. */
+void socket_destroy(socket_t *self);
+
+/* Causa el cierre de la conexion full-duplex asociada al socket */
+void socket_shutdown(socket_t *self);
 
 /* Realiza el binding con la addrinfo recibida en ptr. */
 /* Tambien setea el socket como uno pasivo gracias a listen */
@@ -33,10 +36,8 @@ bool socket_accept(socket_t *self, socket_t *accepted_socket);
 /* Recibe data de la conexion establecida con el socket.*/
 /* Luego, la almacena en el data_buffer. */
 /* Devuelve verdadero en caso de haber recibido todo la data, falso si no. */
-bool socket_receive(socket_t *self, char* buffer, size_t buffer_size, int *received_bytes, int *accum_bytes);
+bool socket_receive(socket_t *self, char* buffer, size_t buffer_size, int *received_bytes);
 
 // int socket_connect(socket_t *self, char* hostname, char* service);
-
-// void socket_shutdown(socket_t *self);
 
 #endif // SOCKET_H
