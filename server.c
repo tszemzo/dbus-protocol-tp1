@@ -13,14 +13,12 @@
 #define CHUNK_SIZE 32
 
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service) {
-
 	memset(hints, 0, sizeof(struct addrinfo));
    	hints->ai_family = AF_INET;       // IPv4     
    	hints->ai_socktype = SOCK_STREAM; // TCP 
    	hints->ai_flags = AI_PASSIVE;     // AI_PASSIVE for server 
 
    	int s;
-
 	if ((s = getaddrinfo(NULL, service, hints, server_info)) != 0) {
 		printf("Error in getaddrinfo: %s\n", gai_strerror(s));
 		return false;
