@@ -5,6 +5,7 @@
 
 #define ERROR 1
 #define EXITO 0
+#define CHUNK_SIZE 32
 
 bool set_remote_address(struct addrinfo *hints, struct addrinfo **client_info, 
 const char *host, const char *service) {
@@ -24,12 +25,59 @@ const char *host, const char *service) {
 	return true;
 }
 
-bool client_run(const char *host, const char *service, const char *data) {
+bool client_connect(socket_t *s, struct addrinfo *client_info) {
+	if (!socket_create(s, client_info)) {
+		printf("Error: %s\n", strerror(errno));
+      	freeaddrinfo(client_info);
+		return false;
+	}
+
+	if(!socket_connect(s, client_info)) {
+		printf("Error: %s\n", strerror(errno));
+		freeaddrinfo(client_info);
+		socket_destroy(s);
+		return false;
+	}
+
+	printf("Socket connected to the remote address..\n");
+	return true;
+}
+
+bool send_data(socket_t *s, char *data) {
+	printf("Data: %s\n", data);
+	char buffer[CHUNK_SIZE];
+  	memset(buffer, 0, CHUNK_SIZE);
+  	bool data_sent;
+
+  	// Aca falta pasar data al buffer
+	data_sent = socket_send(s, data, sizeof(buffer));
+	printf("Data sent?... %d\n", data_sent);
+	if(!data_sent) return false;
+	printf("Data correctly sent..\n");
+	return true;	
+}
+
+void client_destroy(socket_t *s) {
+  	socket_shutdown(s);
+  	socket_destroy(s);
+}
+
+bool client_run(const char *host, const char *service, char *data) {
 	struct addrinfo hints;
    	struct addrinfo *client_info;
+   	socket_t s;
 
    	if (!set_remote_address(&hints, &client_info, host, service)) {
    	 	return ERROR;
    	}
+
+	if (!client_connect(&s, client_info)) {
+		return ERROR;
+	}
+
+	bool sent = send_data(&s, data);
+    client_destroy(&s);
+
+    if (!sent) return ERROR;
     return EXITO;
 }

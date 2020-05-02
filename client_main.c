@@ -10,7 +10,7 @@
 int main(int argc, char** argv) {
     char* host = argv[1];
     char* service = argv[2];
-    char data[5] = "Ailin";
+    char data[] = "Lorem Ipsum";
     client_run(host, service, data);
 	return SUCCESS;
 }

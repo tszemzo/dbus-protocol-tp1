@@ -18,6 +18,13 @@ void socket_shutdown(socket_t *self) {
 	shutdown(self->fd, SHUT_RDWR); 
 }
 
+bool socket_connect(socket_t *self, struct addrinfo *ptr) {
+	int connection = connect(self->fd, ptr->ai_addr, ptr->ai_addrlen);
+	printf("Connection should be Zero: %d\n", connection);
+	if (connection == -1) return false;
+	return true;
+}
+
 bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_queue_length){
 	// Así se puede reutilizar el puerto sin esperar timeout
     int val = 1;
@@ -43,14 +50,13 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_que
     return true;
 }
 
-bool socket_receive(socket_t *self, char* buffer, size_t buffer_size,
-	int *received_bytes) {
+bool socket_receive(socket_t *self, char* buffer, size_t size, int *received_bytes) {
 
 	printf("Empiezo a recibir:\n");
 	int accum_bytes = 0;
-	while (accum_bytes < buffer_size) {
+	while (accum_bytes < size) {
 		printf("Accum %d bytes\n", accum_bytes);
-  	 	*received_bytes = recv(self->fd, &buffer[accum_bytes], buffer_size - accum_bytes, MSG_NOSIGNAL);
+  	 	*received_bytes = recv(self->fd, &buffer[accum_bytes], size - accum_bytes, MSG_NOSIGNAL);
   	 	if (*received_bytes == 0) {
   	 		*received_bytes = -1;
   	 		break;
@@ -62,6 +68,33 @@ bool socket_receive(socket_t *self, char* buffer, size_t buffer_size,
 		accum_bytes += *received_bytes;
 	}
 	printf("Recibido %d bytes: %s\n", accum_bytes, buffer);
+	return true;
+}
+
+bool socket_send(socket_t *self, char* data_buffer, int size) {
+	bool error_sending = false;
+	int accum_bytes = 0;
+	int sent_bytes;
+	
+	printf("Size?... %d\n", size);
+	while (accum_bytes < size && !error_sending) {
+		int current_position = size - accum_bytes;
+		printf("Current_position...%d\n", current_position);
+      	sent_bytes = send(self->fd, &data_buffer[accum_bytes], current_position, MSG_NOSIGNAL);
+      	printf("Sent bytes...%d\n", sent_bytes);
+
+      	if (sent_bytes < 0) {
+      		error_sending = true;
+         	printf("Error: %s\n", strerror(errno));
+      	} else if (sent_bytes == 0) { 
+      		error_sending = true;
+      		printf("Error: socket del servidor cerrado\n");
+      	} else {
+         	accum_bytes += sent_bytes;
+      	}
+	}
+
+	if (error_sending) return false;
 	return true;
 }
 
