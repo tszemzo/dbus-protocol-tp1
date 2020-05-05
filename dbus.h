@@ -10,7 +10,6 @@ typedef struct {
 } dbus_t;
 
 /* */
-void apply_dbus(char *buffer, int size);
 unsigned char *parse_line(dbus_t *self, char *buffer, int size);
 void dbus_create(dbus_t *self);
 void _set_header(dbus_t *self);
