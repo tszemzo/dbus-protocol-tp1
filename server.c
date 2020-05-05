@@ -83,10 +83,8 @@ bool server_run(const char *service) {
    	if (!set_local_address(&hints, &server_info, service)) return ERROR;
 	if (!bind_and_listen(&s, server_info)) return ERROR;
 	if (!server_accept(&s, &client_s)) return ERROR;
-
-	if (!receive_message(&client_s)){
-		return ERROR;
-	}
+	if (!receive_message(&client_s)) return ERROR;
+	// if (!send_response(&client_s)) return ERROR;
 
 	server_destroy(&s, &client_s);
 	return SUCCESS;

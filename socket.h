@@ -46,6 +46,6 @@ bool socket_receive(socket_t *self, char* buffer, size_t size, int *received_byt
 /* Envia lo contenido en data_buffer con largo size */
 /* Devuelve verdadero en caso de exito */
 /* Falso si hubo algun error con el socket o se cerro la direccion remota */
-bool socket_send(socket_t *self, char* data_buffer, int size);
+bool socket_send(socket_t *self, unsigned char* data_buffer, int size);
 
 #endif // SOCKET_H

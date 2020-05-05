@@ -71,7 +71,7 @@ bool socket_receive(socket_t *self, char* buffer, size_t size, int *received_byt
 	return true;
 }
 
-bool socket_send(socket_t *self, char* data_buffer, int size) {
+bool socket_send(socket_t *self, unsigned char* data_buffer, int size) {
 	bool error_sending = false;
 	int accum_bytes = 0;
 	int sent_bytes;
@@ -79,7 +79,6 @@ bool socket_send(socket_t *self, char* data_buffer, int size) {
 	printf("Size?... %d\n", size);
 	while (accum_bytes < size && !error_sending) {
 		int current_position = size - accum_bytes;
-		printf("Current_position...%d\n", current_position);
       	sent_bytes = send(self->fd, &data_buffer[accum_bytes], current_position, MSG_NOSIGNAL);
       	printf("Sent bytes...%d\n", sent_bytes);
 
@@ -93,7 +92,6 @@ bool socket_send(socket_t *self, char* data_buffer, int size) {
          	accum_bytes += sent_bytes;
       	}
 	}
-
 	if (error_sending) return false;
 	return true;
 }

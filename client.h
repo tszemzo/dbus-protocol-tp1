@@ -22,7 +22,7 @@ bool client_connect(socket_t *s, struct addrinfo *result);
 
 /*Envia la data a traves del socket conectado a una direccion remota.*/
 /*Devuelve verdadero si se pudo, false si hubo un error en el envio.*/
-bool send_data(socket_t *s, char *data);
+bool send_data(socket_t *s, FILE *data);
 
 /*Recibe un host y un service con los cuales se crea una conexion.*/
 /*Se leen datos de data y se envian a un servidor. */

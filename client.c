@@ -1,11 +1,12 @@
 #include "client.h"
+#include "dbus.h"
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
 #define ERROR 1
 #define EXITO 0
-#define CHUNK_SIZE 32
+#define CHUNK_SIZE 120
 
 bool set_remote_address(struct addrinfo *hints, struct addrinfo **client_info, 
 const char *host, const char *service) {
@@ -43,17 +44,30 @@ bool client_connect(socket_t *s, struct addrinfo *client_info) {
 	return true;
 }
 
-bool send_data(socket_t *s, char *data) {
-	printf("Data: %s\n", data);
-	char buffer[CHUNK_SIZE];
-  	memset(buffer, 0, CHUNK_SIZE);
+bool send_data(socket_t *s, FILE *data) {
+	char line[CHUNK_SIZE];
   	bool data_sent;
+  	unsigned char *response;
 
-  	// Aca falta pasar data al buffer
-	data_sent = socket_send(s, data, sizeof(buffer));
-	printf("Data sent?... %d\n", data_sent);
+  	dbus_t dbus;
+  	dbus_create(&dbus);
+
+  	// By the moment lets suppose that theres a unique line
+  	while (!feof(data)) {
+		memset(line, 0, CHUNK_SIZE);
+		int read = fread(line, 1, CHUNK_SIZE - 1, data);
+		if (read != CHUNK_SIZE-1 && !feof(data)) {
+			printf("Error reading the file.\n");
+			return false;
+		}		
+	}
+	// apply_dbus(line, strlen(line));
+	printf("Line... %s\n", line);
+	response = parse_line(&dbus, line, strlen(line));
+	printf("Response... %s\n", response);
+	data_sent = socket_send(s, response, 300);
+	printf("Data sent [Should be 1]?... %d\n", data_sent);
 	if(!data_sent) return false;
-	printf("Data correctly sent..\n");
 	return true;	
 }
 
@@ -62,21 +76,23 @@ void client_destroy(socket_t *s) {
   	socket_destroy(s);
 }
 
-bool client_run(const char *host, const char *service, char *data) {
+bool client_run(const char *host, const char *service, char *filename) {
 	struct addrinfo hints;
    	struct addrinfo *client_info;
    	socket_t s;
 
-   	if (!set_remote_address(&hints, &client_info, host, service)) {
-   	 	return ERROR;
-   	}
+   	if (!set_remote_address(&hints, &client_info, host, service)) return ERROR;
+	if (!client_connect(&s, client_info)) return ERROR;
 
-	if (!client_connect(&s, client_info)) {
+	FILE *data = fopen(filename, "r");
+	if (!data) {
+		printf("Error: could not open the file");
 		return ERROR;
 	}
 
 	bool sent = send_data(&s, data);
     client_destroy(&s);
+    fclose(data);
 
     if (!sent) return ERROR;
     return EXITO;
