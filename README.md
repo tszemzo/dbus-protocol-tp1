@@ -5,7 +5,7 @@ Link al Repositorio: https://github.com/tszemzo/dbus-protocol-tp1
 
 ## Resolución del Trabajo
 
-Para la resolucion del trabajo voy a hacer algunos comentarios a nivel global, para luego ahondar un poco más en cada modulo en particular. En primer lugar, voy a incluir un UML con el modelo utilizado para la solucion. Y luego del funcionamiento de nuestro cliente-servidor TCP.
+Para la resolución del trabajo voy a hacer algunos comentarios a nivel global, para luego ahondar un poco más en cada módulo en particular. En primer lugar, voy a incluir un UML con el modelo utilizado para la solución. Y luego del funcionamiento de nuestro cliente-servidor TCP.
 
 UML:
 
@@ -14,3 +14,29 @@ UML:
 Funcionamiento del Socket cliente - servidor:
 
 ![TCP](assets/tcp_socket.png)
+
+Como podemos ver en los diagramas previos, el trabajo práctico consta de la implementación de un protocolo, mediante una arquitectura cliente-servidor comunicandose a traves de un socket. Para ello, se separaron las responsabilidades en distintos TDAs o clases como queramos llamarlos: client, server, socket y dbus.
+
+El TP tiene por objetivo que el cliente, que es el “activo” de los dos envía mensajes que lee de archivos o stdin, utilizando el protocolo dbus y luego el servidor quien los recibe debe ir procesandolos entendiendo el protocolo previamente enunciado.
+
+Encare el problema empezando por construir mi socket, como lo fuimos viendo en clase junto con el servidor para ir testeando al mismo.  Esto es, la creación, la destrucción, la conexión, el bind & listen, etc.... No tuve demasiadas complicaciones aca ya que entre el material de la clase y los ejemplos de la documentación, me fueron de gran ayuda.
+
+Una vez que tenía mi servidor básico funcionando y que recibía data (donde como no tenía un cliente implementado, levantaba un cliente de netcat para poder enviar mensajes), empecé por el cliente y los métodos del tda socket que me faltaban que no eran muchos… creo que send y connect. Aquí tampoco tuve mayores complicaciones, aunque al no estar acostumbrado a C, me costo un poco adaptarme al tipado estático, entre otras cosas.
+
+Luego, empecé a implementar mi módulo del protocolo, el cual si me llevo bastante tiempo, y de hecho no esta terminado aun 100%. El protocolo en sí me trajo muchas complicaciones en primer lugar porque no sabía muy bien cómo debía almacenar la tira de bytes que debía enviar, al haber distintos tipos en la misma, me confundia si debía ir haciéndolo de a partes o una “gran tira”. El approach que tomé fue de empezar por setear la parte “fija” del header que es siempre igual y fui haciéndolo byte a byte, de modo de no equivocarme, aunque el código es un poco engorroso en algunas partes.
+
+Una vez que logre setear la parte fija del header, empecé a procesar lo que serian los distintos parámetros y bueno, aquí es donde hay una lógica tal vez un poco más jugosa y donde entran en juego más variables. Básicamente para cada parámetro en un orden que establece de forma arbitraria calculo su offset o largo, lo parseo agregando su metadata y luego el string correspondiente y voy avanzando mi posición actual en la tira de bytes equivalente a la metadata + el offset para pasar al proximo y asi sucesivamente.
+
+Por último, logré parsear también el body en caso de que hubiere parámetros en la firma, y poder enviarlos de a chunks. Como hago los envios y receives? Basicamente realizó un primer envío del largo del header, y un segundo envío del largo del body. Del otro lado, en el servidor, la recepción la hago, primero pidiendo 16 bytes que corresponden a la metadata de lo que quiero recibir para poder obtener el largo del body y el header, y luego pido los bytes restantes de la tira una vez obtenida esta metadata.
+
+Quiero aclarar que el trabajo práctico no esta finalizado aún y que quedan por hacer algunas tareas que enunciare a continuación:
+
+* Traducción y parseo del protocolo serverside
+* Utilizar memoria dinámica para almacenar la lectura del archivo
+* Agregar el stdin para la lectura de archivos en caso de que no se envíe ninguno
+* Documentar, sobretodo el módulo de dbus
+* Refactorizar, sobretodo el módulo de dbus
+* Pasar el lint y corregir en todos los archivos
+
+Y seguramente aparecerá algún requerimiento más que hasta ahora no visualice pero voy a estar implementandolo esta semana. De todos modos, me gustaría obtener un feedback sobre lo realizado.
+ 
