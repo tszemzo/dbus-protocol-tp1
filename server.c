@@ -10,7 +10,10 @@
 #define SUCCESS 0
 #define ERROR 1
 #define ACCEPT_QUEUE_LENGTH 10
-#define CHUNK_SIZE 32
+#define METADATA_SIZE 16
+#define HEADER_SIZE_POSITION 12
+#define BODY_SIZE_POSITION 4
+#define SERVER_RESPONSE_SIZE 3
 
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service) {
 	memset(hints, 0, sizeof(struct addrinfo));
@@ -53,18 +56,24 @@ bool server_accept(socket_t *s, socket_t *client_s) {
 	return true;
 }
 
-bool receive_message(socket_t *s) {
-	char buffer[CHUNK_SIZE];
-   	int received_bytes = 0;
+bool send_response(socket_t *client_s) {
+  	bool data_sent;
+  	unsigned char response[SERVER_RESPONSE_SIZE];
+  	response[0] = 'O';
+  	response[1] = 'K';
+  	response[2] = '\n';
 
-   	// Mientras haya conexion
-  	while (received_bytes >= 0) {
-  	 	memset(buffer, 0, CHUNK_SIZE); 
-  	 	received_bytes = 0;
-  	 	// Leeme CHUNK_SIZE bytes y storeamelos en buffer
-  	 	if(!socket_receive(s, buffer, CHUNK_SIZE, &received_bytes)) return false;
-  	}
-  	return true;
+	data_sent = socket_send(client_s, response, SERVER_RESPONSE_SIZE);
+	if(!data_sent) return false;
+	return true;
+}
+
+void receive_message(socket_t *s, char* buffer, int size) {
+   	int received_bytes = 0;
+ 	memset(buffer, 0, size); 
+ 	received_bytes = 0;
+ 	// Leeme size bytes y storeamelos en buffer
+ 	socket_receive(s, buffer, size, &received_bytes);
 }
 
 void server_destroy(socket_t *s, socket_t *client_s) {
@@ -83,8 +92,15 @@ bool server_run(const char *service) {
    	if (!set_local_address(&hints, &server_info, service)) return ERROR;
 	if (!bind_and_listen(&s, server_info)) return ERROR;
 	if (!server_accept(&s, &client_s)) return ERROR;
-	if (!receive_message(&client_s)) return ERROR;
-	// if (!send_response(&client_s)) return ERROR;
+
+	// This is going to be encapsulated
+	char message_buffer[METADATA_SIZE];
+	receive_message(&client_s, message_buffer, METADATA_SIZE);
+	int content_size = message_buffer[BODY_SIZE_POSITION] + message_buffer[HEADER_SIZE_POSITION];
+	char content_buffer[content_size];
+	receive_message(&client_s, content_buffer, content_size);
+
+	if (!send_response(&client_s)) return ERROR;
 
 	server_destroy(&s, &client_s);
 	return SUCCESS;

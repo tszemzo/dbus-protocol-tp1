@@ -18,8 +18,8 @@ const char *host, const char *service) {
 
    	int s;
    	if ((s = getaddrinfo(host, service, hints, client_info)) != 0) { 
-      printf("Error in getaddrinfo: %s\n", gai_strerror(s));
-      return false;
+    	printf("Error in getaddrinfo: %s\n", gai_strerror(s));
+    	return false;
 	}
 	printf("%d\n", s); 
 	printf("Remote address successfully setted..\n"); 
@@ -61,13 +61,19 @@ bool send_data(socket_t *s, FILE *data) {
 			return false;
 		}		
 	}
-	// apply_dbus(line, strlen(line));
 	printf("Line... %s\n", line);
 	response = parse_line(&dbus, line, strlen(line));
-	printf("Response... %s\n", response);
-	data_sent = socket_send(s, response, 300);
-	printf("Data sent [Should be 1]?... %d\n", data_sent);
+	int header_length = dbus_header_length(&dbus);
+	int body_length = dbus_body_length(&dbus);
+
+	data_sent = socket_send(s, response, header_length);
 	if(!data_sent) return false;
+	printf("Data sent [Should be 1]?... %d\n", data_sent);
+
+	data_sent = socket_send(s, &response[header_length], body_length);
+	if(!data_sent) return false;
+	printf("Data sent 2 [Should be 1]?... %d\n", data_sent);
+
 	return true;	
 }
 

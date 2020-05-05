@@ -22,6 +22,10 @@ bool bind_and_listen(socket_t *s, struct addrinfo *server_info);
 /*En caso de que algo falle devuelve false. True en caso contrario.*/
 bool server_accept(socket_t *s, socket_t *client_s);
 
+/* Envia el OK luego de recibir el mensaje del cliente */
+/*En caso de que algo falle devuelve false. True en caso contrario.*/
+bool send_response(socket_t *client_s);
+
 /*Recibe un service a partir del cual se creara una conexion*/
 /*Las conexiones creadas son cerradas al final.*/ 
 /*En caso de errores devuelve 1. 0 en caso contrario.*/ 
@@ -29,5 +33,8 @@ bool server_run(const char *service);
 
 /*Destruye los sockets asociados al servidor y cierra las conexiones.*/ 
 void server_destroy(socket_t *s, socket_t *client_s);
+
+/*Recibe un mensaje de size bytes utilizando el socket.*/ 
+void receive_message(socket_t *s, char* buffer, int size);
 
 #endif // SERVER_H

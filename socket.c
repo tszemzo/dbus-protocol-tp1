@@ -76,7 +76,7 @@ bool socket_send(socket_t *self, unsigned char* data_buffer, int size) {
 	int accum_bytes = 0;
 	int sent_bytes;
 	
-	printf("Size?... %d\n", size);
+	printf("Size to send?... %d\n", size);
 	while (accum_bytes < size && !error_sending) {
 		int current_position = size - accum_bytes;
       	sent_bytes = send(self->fd, &data_buffer[accum_bytes], current_position, MSG_NOSIGNAL);

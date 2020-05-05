@@ -5,12 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define DESTINY_TYPE "6"
-#define ROUTE_TYPE "1"
-#define INTERFACE_TYPE "2"
-#define METHOD_TYPE "3"
-#define FIRM_TYPE "9"
 #define METADATA_LENGTH 8
+#define FIRM_METADATA_LENGTH 5
 #define START_OF_PARAMS 16
 #define ALIGNMENT 8
 
@@ -49,9 +45,29 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 	_parse_param(&self->header[header_position], &buffer[current_position], offset, param_type, data_type);
 	header_position = header_position + METADATA_LENGTH + offset;
 	header_position = _align_header(&self->header[header_position], header_position);
-	printf("alineado?? %d\n", header_position);
+	// firma
+	param_type = '9';
+	data_type = 'g';
+	current_position = current_position + offset + 1;
+	// saving the firm position for the body
+	int firm_position = current_position;
+	offset = _find_firm_params(&buffer[current_position]);
+	_parse_firm(&self->header[header_position], offset, param_type, data_type);
+	header_position = header_position + FIRM_METADATA_LENGTH + offset;
+	header_position = _align_header(&self->header[header_position], header_position);
 
+	self->header_length = header_position;
+	self->body_length = _parse_body(&self->header[header_position], &buffer[firm_position]);
+
+	_add_lengths(self, self->header_length, self->body_length);
+
+	self->id += 1;
 	return self->header;
+}
+
+void _add_lengths(dbus_t *self, uint32_t header_length, uint32_t body_length) {
+    memcpy(&self->header[4], &body_length, 4);
+    memcpy(&self->header[12], &header_length, 4);
 }
 
 int _find_begin_param(char *buffer) {
@@ -64,8 +80,22 @@ int _find_begin_param(char *buffer) {
 		}
 		param_size++;
 	}
-	printf("Param Size: %d\n", param_size);
 	return param_size;
+}
+
+int _find_firm_params(char *buffer) {
+	int param_size = 0;
+	int params_count = 0;
+	while (buffer[param_size] != ')') {
+		if (buffer[param_size] == ','){
+			params_count += 1;
+		}
+		param_size++;
+	}
+	if (param_size > 0){
+		params_count++;	
+	}
+	return params_count;
 }
 
 int _align_header(unsigned char *header, int header_position) {
@@ -78,18 +108,57 @@ int _align_header(unsigned char *header, int header_position) {
 	return header_position;
 }
 
+void _parse_firm(unsigned char *header, int offset, char param_type, char data_type) {
+	int pos = 0;
+	_write_metadata_param(header, pos, offset, param_type, data_type);
+	pos += FIRM_METADATA_LENGTH;
+	for (int i = 0; i < offset; i++) {
+		header[pos] = 's';
+		pos++;
+	}
+	header[pos] = '\0';
+}
+
+int _parse_body(unsigned char *header, char *buffer) {
+	int body_size = 0;
+	int pos = 0;
+	int word_size = 0;
+	while (buffer[body_size] != ')') {
+		if (buffer[body_size] == ','){
+			memcpy(&header[pos], &word_size, 4);
+			pos += 4;
+			memcpy(&header[pos], &buffer[body_size - word_size], word_size);
+			pos += word_size;
+			header[pos] = '\0';
+			pos += 1;
+			word_size = 0;
+			body_size++;
+		}
+		else {
+			word_size++;
+			body_size++;
+		}
+	}
+	if (body_size > 0) {
+		memcpy(&header[pos], &word_size, 4);
+		pos += 4;
+		memcpy(&header[pos], &buffer[body_size - word_size], word_size);
+		pos += word_size;
+		header[pos] = '\0';
+		pos += 1;
+	}
+	return pos;
+}
+
 void _parse_param(unsigned char *header, char *buffer, int offset, char param_type, char data_type) {
 	char param[offset];
 	memcpy(param, buffer, offset);
-	printf("param: %s\n", param);
-	printf("param_type: %c\n", param_type);
 	int pos = 0;
 	_write_metadata_param(header, pos, offset, param_type, data_type);
 	pos += METADATA_LENGTH;
 	memcpy(&header[pos], &param, offset);
 	pos += offset;
 	header[pos] = '\0';
-	printf("post header: %s\n", header);
 }
 
 void _write_metadata_param(unsigned char *header, int pos, int offset, char param_type, char data_type) {
@@ -101,7 +170,13 @@ void _write_metadata_param(unsigned char *header, int pos, int offset, char para
 	pos += 1;
 	header[pos] = '\0';
 	pos += 1;
-	memcpy(&header[pos], &offset, 4);
+	char firm_param_type = '9';
+	if (param_type == firm_param_type){
+		memcpy(&header[pos], &offset, 1);
+	}
+	else {
+		memcpy(&header[pos], &offset, 4);
+	}
 }
 
 void _set_header(dbus_t *self) {
@@ -119,5 +194,13 @@ void _set_header(dbus_t *self) {
 void dbus_create(dbus_t *self) {
 	(self->id) = 1;
 	memset(self->header, 1, 300);
-
 }
+
+uint32_t dbus_body_length(dbus_t *self){
+	return self->body_length;
+}
+
+uint32_t dbus_header_length(dbus_t *self){
+	return self->header_length;
+}
+
