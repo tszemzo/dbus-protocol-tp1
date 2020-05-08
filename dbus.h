@@ -23,5 +23,9 @@ void _add_lengths(dbus_t *self, uint32_t header_length, uint32_t body_length);
 void _write_metadata_param(unsigned char *header, int pos, int offset, char param_type, char data_type);
 uint32_t dbus_body_length(dbus_t *self);
 uint32_t dbus_header_length(dbus_t *self);
+uint32_t dbus_id(dbus_t *self);
+int get_param_start(char *dest_start, char* param, int size);
+int get_param_size(char *dest_start);
+int next_word_offset(char *content_buffer);
 
 #endif // DBUS_H	

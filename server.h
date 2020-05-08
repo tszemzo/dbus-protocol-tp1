@@ -35,6 +35,6 @@ bool server_run(const char *service);
 void server_destroy(socket_t *s, socket_t *client_s);
 
 /*Recibe un mensaje de size bytes utilizando el socket.*/ 
-void receive_message(socket_t *s, char* buffer, int size);
+bool receive_message(socket_t *s, char* buffer, int size);
 
 #endif // SERVER_H

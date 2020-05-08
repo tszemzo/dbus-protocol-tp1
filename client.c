@@ -7,6 +7,7 @@
 #define ERROR 1
 #define EXITO 0
 #define CHUNK_SIZE 120
+#define SERVER_RESPONSE_SIZE 3
 
 bool set_remote_address(struct addrinfo *hints, struct addrinfo **client_info, 
 const char *host, const char *service) {
@@ -44,14 +45,11 @@ bool client_connect(socket_t *s, struct addrinfo *client_info) {
 	return true;
 }
 
-bool send_data(socket_t *s, FILE *data) {
+bool send_data(socket_t *s, FILE *data, dbus_t *dbus) {
 	char line[CHUNK_SIZE];
   	bool data_sent;
   	unsigned char *response;
-
-  	dbus_t dbus;
-  	dbus_create(&dbus);
-
+  	
   	// By the moment lets suppose that theres a unique line
   	while (!feof(data)) {
 		memset(line, 0, CHUNK_SIZE);
@@ -62,9 +60,9 @@ bool send_data(socket_t *s, FILE *data) {
 		}		
 	}
 	printf("Line... %s\n", line);
-	response = parse_line(&dbus, line, strlen(line));
-	int header_length = dbus_header_length(&dbus);
-	int body_length = dbus_body_length(&dbus);
+	response = parse_line(dbus, line, strlen(line));
+	int header_length = dbus_header_length(dbus);
+	int body_length = dbus_body_length(dbus);
 
 	data_sent = socket_send(s, response, header_length);
 	if(!data_sent) return false;
@@ -77,6 +75,14 @@ bool send_data(socket_t *s, FILE *data) {
 	return true;	
 }
 
+void receive_data(socket_t *s, char* buffer, int size) {
+   	int received_bytes = 0;
+ 	memset(buffer, 0, size); 
+ 	received_bytes = 0;
+ 	// Leeme size bytes y storeamelos en buffer
+ 	socket_receive(s, buffer, size, &received_bytes);
+}
+
 void client_destroy(socket_t *s) {
   	socket_shutdown(s);
   	socket_destroy(s);
@@ -86,6 +92,9 @@ bool client_run(const char *host, const char *service, char *filename) {
 	struct addrinfo hints;
    	struct addrinfo *client_info;
    	socket_t s;
+   	dbus_t dbus;
+   	char receive_buffer[SERVER_RESPONSE_SIZE];
+  	
 
    	if (!set_remote_address(&hints, &client_info, host, service)) return ERROR;
 	if (!client_connect(&s, client_info)) return ERROR;
@@ -96,7 +105,12 @@ bool client_run(const char *host, const char *service, char *filename) {
 		return ERROR;
 	}
 
-	bool sent = send_data(&s, data);
+	dbus_create(&dbus);
+	int id = dbus_id(&dbus);
+	bool sent = send_data(&s, data, &dbus);
+	receive_data(&s, receive_buffer, SERVER_RESPONSE_SIZE);
+	printf("%04d: %s\n", id, receive_buffer);
+
     client_destroy(&s);
     fclose(data);
 

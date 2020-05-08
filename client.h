@@ -2,6 +2,7 @@
 #define CLIENT_H
 
 #include "socket.h"
+#include "dbus.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
@@ -22,7 +23,7 @@ bool client_connect(socket_t *s, struct addrinfo *result);
 
 /*Envia la data a traves del socket conectado a una direccion remota.*/
 /*Devuelve verdadero si se pudo, false si hubo un error en el envio.*/
-bool send_data(socket_t *s, FILE *data);
+bool send_data(socket_t *s, FILE *data, dbus_t *dbus);
 
 /*Recibe un host y un service con los cuales se crea una conexion.*/
 /*Se leen datos de data y se envian a un servidor. */
