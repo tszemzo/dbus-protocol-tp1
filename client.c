@@ -11,7 +11,6 @@
 
 bool set_remote_address(struct addrinfo *hints, struct addrinfo **client_info, 
 const char *host, const char *service) {
-
 	memset(hints, 0, sizeof(struct addrinfo));
    	hints->ai_family = AF_INET;       // IPv4 (or AF_INET6 for IPv6)
    	hints->ai_socktype = SOCK_STREAM; // TCP  (or SOCK_DGRAM for UDP) 

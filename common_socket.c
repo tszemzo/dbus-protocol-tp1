@@ -25,7 +25,8 @@ bool socket_connect(socket_t *self, struct addrinfo *ptr) {
 	return true;
 }
 
-bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_queue_length){
+bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, 
+	int accept_queue_length) {
 	// Así se puede reutilizar el puerto sin esperar timeout
     int val = 1;
     setsockopt(self->fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
@@ -50,13 +51,14 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_que
     return true;
 }
 
-bool socket_receive(socket_t *self, char* buffer, size_t size, int *received_bytes) {
-
+bool socket_receive(socket_t *self, char* buffer, size_t size, 
+	int *received_bytes) {
 	printf("Empiezo a recibir:\n");
 	int accum_bytes = 0;
 	while (accum_bytes < size) {
 		printf("Accum %d bytes\n", accum_bytes);
-  	 	*received_bytes = recv(self->fd, &buffer[accum_bytes], size - accum_bytes, MSG_NOSIGNAL);
+  	 	*received_bytes = recv(self->fd, &buffer[accum_bytes], 
+  	 		size - accum_bytes, MSG_NOSIGNAL);
   	 	if (*received_bytes == 0) {
   	 		*received_bytes = -1;
   	 		break;
@@ -79,7 +81,8 @@ bool socket_send(socket_t *self, unsigned char* data_buffer, int size) {
 	printf("Size to send?... %d\n", size);
 	while (accum_bytes < size && !error_sending) {
 		int current_position = size - accum_bytes;
-      	sent_bytes = send(self->fd, &data_buffer[accum_bytes], current_position, MSG_NOSIGNAL);
+      	sent_bytes = send(self->fd, &data_buffer[accum_bytes], 
+      		current_position, MSG_NOSIGNAL);
       	printf("Sent bytes...%d\n", sent_bytes);
 
       	if (sent_bytes < 0) {

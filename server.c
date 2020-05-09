@@ -18,7 +18,8 @@
 #define SERVER_RESPONSE_SIZE 3
 #define METADATA_CONTENT_SIZE 8
 
-bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service) {
+bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info,
+	const char *service) {
 	memset(hints, 0, sizeof(struct addrinfo));
    	hints->ai_family = AF_INET;       // IPv4     
    	hints->ai_socktype = SOCK_STREAM; // TCP 
@@ -29,8 +30,6 @@ bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, co
 		printf("Error in getaddrinfo: %s\n", gai_strerror(s));
 		return false;
 	}
-	printf("%d\n", s); 
-	printf("Local address successfully setted..\n"); 
 	return true;
 }
 
@@ -40,7 +39,6 @@ bool bind_and_listen(socket_t *s, struct addrinfo *server_info) {
       	freeaddrinfo(server_info);
 		return false;
 	}
-	printf("Socket ready for binding..\n");
 
 	if (!socket_bind_and_listen(s, server_info, ACCEPT_QUEUE_LENGTH)) {
 		printf("Error: %s\n", strerror(errno));
@@ -103,7 +101,6 @@ bool server_run(const char *service) {
 		// This is going to be encapsulated
 		char message_buffer[METADATA_SIZE];
 		bool received = receive_message(&client_s, message_buffer, METADATA_SIZE);
-		printf("bool of recei %d\n", received);
 		if (!received) {
 			printf("Entro \n");
 			break;
@@ -161,9 +158,9 @@ bool server_run(const char *service) {
 				printf("    * %s\n", param);
 			}
 		}
-	}
 
-	if (!send_response(&client_s)) return ERROR;
+		if (!send_response(&client_s)) return ERROR;
+	}
 
 	server_destroy(&s, &client_s);
 	return SUCCESS;

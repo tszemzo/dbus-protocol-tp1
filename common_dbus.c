@@ -12,40 +12,47 @@
 #define ALIGNMENT 8
 
 unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
-
 	_set_header(self);
 	// destination
 	char param_type = '6';
 	char data_type = 's';
 	int current_position = 0;
 	int offset = _find_begin_param(&buffer[current_position]);
-	_parse_param(&self->header[START_OF_PARAMS], &buffer[current_position], offset, param_type, data_type);
+	_parse_param(&self->header[START_OF_PARAMS], &buffer[current_position], 
+		offset, param_type, data_type);
 	int header_position = METADATA_LENGTH + START_OF_PARAMS + offset;
-	header_position = _align_header(&self->header[header_position], header_position);
+	header_position = _align_header(&self->header[header_position], 
+		header_position);
 	// route
 	param_type = '1';
 	data_type = 'o';
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
-	_parse_param(&self->header[header_position], &buffer[current_position], offset, param_type, data_type);
+	_parse_param(&self->header[header_position], &buffer[current_position], 
+		offset, param_type, data_type);
 	header_position = header_position + METADATA_LENGTH + offset;
-	header_position = _align_header(&self->header[header_position], header_position);
+	header_position = _align_header(&self->header[header_position], 
+		header_position);
 	// interface
 	param_type = '2';
 	data_type = 's';
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
-	_parse_param(&self->header[header_position], &buffer[current_position], offset, param_type, data_type);
+	_parse_param(&self->header[header_position], &buffer[current_position], 
+		offset, param_type, data_type);
 	header_position = header_position + METADATA_LENGTH + offset;
-	header_position = _align_header(&self->header[header_position], header_position);
+	header_position = _align_header(&self->header[header_position], 
+		header_position);
 	// method
 	param_type = '3';
 	data_type = 's';
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
-	_parse_param(&self->header[header_position], &buffer[current_position], offset, param_type, data_type);
+	_parse_param(&self->header[header_position], &buffer[current_position], 
+		offset, param_type, data_type);
 	header_position = header_position + METADATA_LENGTH + offset;
-	header_position = _align_header(&self->header[header_position], header_position);
+	header_position = _align_header(&self->header[header_position], 
+		header_position);
 	// firma
 	param_type = '9';
 	data_type = 'g';
@@ -55,10 +62,12 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 	offset = _find_firm_params(&buffer[current_position]);
 	_parse_firm(&self->header[header_position], offset, param_type, data_type);
 	header_position = header_position + FIRM_METADATA_LENGTH + offset;
-	header_position = _align_header(&self->header[header_position], header_position);
+	header_position = _align_header(&self->header[header_position], 
+		header_position);
 
 	self->header_length = header_position;
-	self->body_length = _parse_body(&self->header[header_position], &buffer[firm_position]);
+	self->body_length = _parse_body(&self->header[header_position], 
+		&buffer[firm_position]);
 
 	_add_lengths(self, self->header_length, self->body_length);
 
@@ -75,7 +84,8 @@ int _find_begin_param(char *buffer) {
 	int param_size = 0;
 	bool found = false;
 	while (!found) {
-		if (buffer[param_size] == ' ' || buffer[param_size] == '(' || buffer[param_size] == '\n'){
+		if (buffer[param_size] == ' ' || buffer[param_size] == '(' || 
+			buffer[param_size] == '\n'){
 			found = true;
 			break;
 		}
@@ -109,7 +119,8 @@ int _align_header(unsigned char *header, int header_position) {
 	return header_position;
 }
 
-void _parse_firm(unsigned char *header, int offset, char param_type, char data_type) {
+void _parse_firm(unsigned char *header, int offset, char param_type, 
+	char data_type) {
 	int pos = 0;
 	_write_metadata_param(header, pos, offset, param_type, data_type);
 	pos += FIRM_METADATA_LENGTH;
@@ -134,8 +145,7 @@ int _parse_body(unsigned char *header, char *buffer) {
 			pos += 1;
 			word_size = 0;
 			body_size++;
-		}
-		else {
+		} else {
 			word_size++;
 			body_size++;
 		}
@@ -151,7 +161,8 @@ int _parse_body(unsigned char *header, char *buffer) {
 	return pos;
 }
 
-void _parse_param(unsigned char *header, char *buffer, int offset, char param_type, char data_type) {
+void _parse_param(unsigned char *header, char *buffer, int offset, 
+	char param_type, char data_type) {
 	char param[offset];
 	memcpy(param, buffer, offset);
 	int pos = 0;
@@ -162,7 +173,8 @@ void _parse_param(unsigned char *header, char *buffer, int offset, char param_ty
 	header[pos] = '\0';
 }
 
-void _write_metadata_param(unsigned char *header, int pos, int offset, char param_type, char data_type) {
+void _write_metadata_param(unsigned char *header, int pos, int offset, 
+	char param_type, char data_type) {
 	header[pos] = param_type;
 	pos += 1;
 	header[pos] = '1';
@@ -174,8 +186,7 @@ void _write_metadata_param(unsigned char *header, int pos, int offset, char para
 	char firm_param_type = '9';
 	if (param_type == firm_param_type){
 		memcpy(&header[pos], &offset, 1);
-	}
-	else {
+	} else {
 		memcpy(&header[pos], &offset, 4);
 	}
 }
@@ -207,7 +218,7 @@ int get_param_size(char *dest_start){
 	int size = dest_start[pos] + last_cero;
 	printf("The size of this param is: %d\n", size);
 	return size;
-};
+}
 
 int next_word_offset(char *content_buffer){
 	int pos = 0;
@@ -215,7 +226,7 @@ int next_word_offset(char *content_buffer){
 		pos++;
 	}
 	return pos;
-};
+}
 
 uint32_t dbus_body_length(dbus_t *self){
 	return self->body_length;
