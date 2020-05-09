@@ -5,6 +5,11 @@
 #include <errno.h>
 
 bool socket_create(socket_t *self, struct addrinfo *ptr) {
+
+	// no, el socket_create solo deberia recibir selt, el ptr no es necesario
+	// ademas hay constantes conocidas para los valores de la creacion del socket
+	// buscar la documentacion
+
 	self->fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 	if (self->fd == -1) return false;
 	return true;
@@ -18,12 +23,22 @@ void socket_shutdown(socket_t *self) {
 	shutdown(self->fd, SHUT_RDWR); 
 }
 
+
+// para el connect te falta la creacion de hints,
+// obtener el getaddrinfo
+// recorrer los resultados de estos y si alguno es valido devolverlo
+
+
 bool socket_connect(socket_t *self, struct addrinfo *ptr) {
 	int connection = connect(self->fd, ptr->ai_addr, ptr->ai_addrlen);
 	printf("Connection should be Zero: %d\n", connection);
 	if (connection == -1) return false;
 	return true;
 }
+
+
+// mismo que connect, tenes que iterar por todos los resultados de getaddreinfo
+// no podes suponer que esto va a funcionar a la primera
 
 bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr, int accept_queue_length){
 	// Así se puede reutilizar el puerto sin esperar timeout
@@ -97,6 +112,9 @@ bool socket_send(socket_t *self, unsigned char* data_buffer, int size) {
 }
 
 bool socket_accept(socket_t *self, socket_t *new_socket) {
+	// esta mal pisar el FD, la funcion debe devolver un nuevo FD
+	// el nuevo FD es el que te devuulver la funcion accept
+	
 	new_socket->fd = accept(self->fd, NULL, NULL);
 	if ( new_socket->fd == -1) return false;
 
