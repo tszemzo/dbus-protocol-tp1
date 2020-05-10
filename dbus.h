@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 typedef struct {
-	unsigned char header[300];
+	unsigned char header[500];
 	uint32_t id;
 	uint32_t header_length;
 	uint32_t body_length;

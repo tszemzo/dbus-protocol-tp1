@@ -22,7 +22,6 @@ int main(int argc, char** argv) {
     char* service = argv[SERVICE];
     char* filename = argv[FILE];
 
-    printf("File to read: %s\n", filename);
     client_run(host, service, filename);
 	return SUCCESS;
 }

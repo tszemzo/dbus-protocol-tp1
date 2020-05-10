@@ -108,9 +108,19 @@ bool server_run(const char *service) {
 		int body_length = message_buffer[BODY_SIZE_POSITION];
 		int header_length = message_buffer[HEADER_SIZE_POSITION];
 		int message_id = message_buffer[ID_POSITION];
+		
+		header_length = 160;
+
+		// int body_length = m[4] + (m[5] << 8) + (m[6] << 16) + (m[7] << 24);
+	 //    int message_id = m[8] + (m[9] << 8) + (m[10] << 16) + (m[11] << 24);
+	 //    int header_length = m[12] + (m[13] << 8) + (m[14] << 16) + (m[15] << 24);
+
+	    printf("body length %d\n", body_length);
+		printf("header_length %d\n", header_length);
+		printf("message_id %d\n", message_id);
 
 		int content_size = body_length + header_length - METADATA_SIZE;
-		char content_buffer[content_size];
+		char content_buffer[content_size];		
 		receive_message(&client_s, content_buffer, content_size);
 
 		printf("* Id: %04d\n", message_id);

@@ -23,13 +23,13 @@ bool client_connect(socket_t *s, struct addrinfo *result);
 
 /*Envia la data a traves del socket conectado a una direccion remota.*/
 /*Devuelve verdadero si se pudo, false si hubo un error en el envio.*/
-bool send_data(socket_t *s, FILE *data, dbus_t *dbus);
+bool send_data(socket_t *s, char *data, dbus_t *dbus);
 
 /*Recibe un host y un service con los cuales se crea una conexion.*/
 /*Se leen datos de data y se envian a un servidor. */
 /*Luego, el socket es cerrado al final.*/
 /*En caso de errores devuelve 1. 0 en caso contrario.*/ 
-bool client_run(const char *host, const char *service, char *data);
+void client_run(const char *host, const char *service, char *data);
 
 /*Destruye el socket asociado al client y cierra la conexion.*/ 
 void client_destroy(socket_t *s);

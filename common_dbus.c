@@ -20,7 +20,7 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 	int offset = _find_begin_param(&buffer[current_position]);
 	_parse_param(&self->header[START_OF_PARAMS], &buffer[current_position], 
 		offset, param_type, data_type);
-	int header_position = METADATA_LENGTH + START_OF_PARAMS + offset;
+	int header_position = METADATA_LENGTH + START_OF_PARAMS + offset + 1;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
 	// route
@@ -30,7 +30,7 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 	offset = _find_begin_param(&buffer[current_position]);
 	_parse_param(&self->header[header_position], &buffer[current_position], 
 		offset, param_type, data_type);
-	header_position = header_position + METADATA_LENGTH + offset;
+	header_position = header_position + METADATA_LENGTH + offset + 1;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
 	// interface
@@ -40,7 +40,7 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 	offset = _find_begin_param(&buffer[current_position]);
 	_parse_param(&self->header[header_position], &buffer[current_position], 
 		offset, param_type, data_type);
-	header_position = header_position + METADATA_LENGTH + offset;
+	header_position = header_position + METADATA_LENGTH + offset + 1;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
 	// method
@@ -50,7 +50,7 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 	offset = _find_begin_param(&buffer[current_position]);
 	_parse_param(&self->header[header_position], &buffer[current_position], 
 		offset, param_type, data_type);
-	header_position = header_position + METADATA_LENGTH + offset;
+	header_position = header_position + METADATA_LENGTH + offset + 1;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
 	// firma
@@ -76,6 +76,8 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 }
 
 void _add_lengths(dbus_t *self, uint32_t header_length, uint32_t body_length) {
+	printf("header_length %d\n", header_length);
+	printf("body_length %d\n", body_length);
     memcpy(&self->header[4], &body_length, 4);
     memcpy(&self->header[12], &header_length, 4);
 }
@@ -163,14 +165,18 @@ int _parse_body(unsigned char *header, char *buffer) {
 
 void _parse_param(unsigned char *header, char *buffer, int offset, 
 	char param_type, char data_type) {
-	char param[offset];
+	// char param[offset];	
+	char *param = malloc(offset);
 	memcpy(param, buffer, offset);
+	printf("PARAM %s\n", param);
 	int pos = 0;
 	_write_metadata_param(header, pos, offset, param_type, data_type);
 	pos += METADATA_LENGTH;
-	memcpy(&header[pos], &param, offset);
+	memcpy(&header[pos], param, offset);
+	printf("HEADER{pos} %s\n", &header[pos]);
 	pos += offset;
 	header[pos] = '\0';
+	free(param);
 }
 
 void _write_metadata_param(unsigned char *header, int pos, int offset, 
@@ -205,7 +211,7 @@ void _set_header(dbus_t *self) {
 
 void dbus_create(dbus_t *self) {
 	(self->id) = 1;
-	memset(self->header, 1, 300);
+	memset(self->header, 0, 300);
 }
 
 int get_param_size(char *dest_start){

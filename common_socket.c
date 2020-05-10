@@ -20,7 +20,6 @@ void socket_shutdown(socket_t *self) {
 
 bool socket_connect(socket_t *self, struct addrinfo *ptr) {
 	int connection = connect(self->fd, ptr->ai_addr, ptr->ai_addrlen);
-	printf("Connection should be Zero: %d\n", connection);
 	if (connection == -1) return false;
 	return true;
 }
@@ -33,7 +32,6 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr,
 
 	int binding = bind(self->fd, ptr->ai_addr, ptr->ai_addrlen);
 	freeaddrinfo(ptr);
-	printf("Binding result...%d\n", binding);
 
 	if (binding == -1) {
       close(self->fd);
@@ -41,7 +39,6 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr,
     }
 
     int listening = listen(self->fd, accept_queue_length);
-    printf("Listening result...%d\n", listening);
 
     if (listening == -1) {
     	close(self->fd);
@@ -53,10 +50,8 @@ bool socket_bind_and_listen(socket_t *self, struct addrinfo *ptr,
 
 bool socket_receive(socket_t *self, char* buffer, size_t size, 
 	int *received_bytes) {
-	printf("Empiezo a recibir:\n");
 	int accum_bytes = 0;
 	while (accum_bytes < size) {
-		printf("Accum %d bytes\n", accum_bytes);
   	 	*received_bytes = recv(self->fd, &buffer[accum_bytes], 
   	 		size - accum_bytes, MSG_NOSIGNAL);
   	 	if (*received_bytes == 0) {
@@ -78,12 +73,10 @@ bool socket_send(socket_t *self, unsigned char* data_buffer, int size) {
 	int accum_bytes = 0;
 	int sent_bytes;
 	
-	printf("Size to send?... %d\n", size);
 	while (accum_bytes < size && !error_sending) {
 		int current_position = size - accum_bytes;
       	sent_bytes = send(self->fd, &data_buffer[accum_bytes], 
       		current_position, MSG_NOSIGNAL);
-      	printf("Sent bytes...%d\n", sent_bytes);
 
       	if (sent_bytes < 0) {
       		error_sending = true;
@@ -102,7 +95,5 @@ bool socket_send(socket_t *self, unsigned char* data_buffer, int size) {
 bool socket_accept(socket_t *self, socket_t *new_socket) {
 	new_socket->fd = accept(self->fd, NULL, NULL);
 	if ( new_socket->fd == -1) return false;
-
-	printf("Accepting socket fd...%d\n", new_socket->fd);
 	return true;
 }
