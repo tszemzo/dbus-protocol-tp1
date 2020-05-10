@@ -41,6 +41,8 @@ We do a small hack, which is to ignore //'s with "'s after them on the
 same line, but it is far from perfect (in either direction).
 """
 
+# este codigo no es tuyo, quitarlo de las entregas
+
 import codecs
 import copy
 import getopt

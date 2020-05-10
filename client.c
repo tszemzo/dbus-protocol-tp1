@@ -9,15 +9,19 @@
 #define CHUNK_SIZE 120
 #define SERVER_RESPONSE_SIZE 3
 
+// usar un tda cliente
+
 bool set_remote_address(struct addrinfo *hints, struct addrinfo **client_info, 
 const char *host, const char *service) {
 
+	/* esto es parte del socket, no tenes que tenerlo en el cliente */
 	memset(hints, 0, sizeof(struct addrinfo));
    	hints->ai_family = AF_INET;       // IPv4 (or AF_INET6 for IPv6)
    	hints->ai_socktype = SOCK_STREAM; // TCP  (or SOCK_DGRAM for UDP) 
    	hints->ai_flags = 0;              // None
 
    	int s;
+   	// no liberas memoria para getaddrinfo
    	if ((s = getaddrinfo(host, service, hints, client_info)) != 0) { 
     	printf("Error in getaddrinfo: %s\n", gai_strerror(s));
     	return false;

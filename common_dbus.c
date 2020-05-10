@@ -11,6 +11,9 @@
 #define START_OF_PARAMS 16
 #define ALIGNMENT 8
 
+// esta funcion es muy larga, separarlas en varias funciones
+// usar constates para los caracteres del los mensajes
+
 unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 
 	_set_header(self);

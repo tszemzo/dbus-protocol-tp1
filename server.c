@@ -20,6 +20,12 @@
 
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info, const char *service) {
 	memset(hints, 0, sizeof(struct addrinfo));
+	/* esto es parte de la construccion del socket
+	no tiene que ser conocido por el server que lo unico que tiene que hacer es 
+	llamar a las funciones de la api
+	ademas no estas iterando sobre los resultados de getaddrinfo 
+	y no estas liberando la memoria correspondiente
+	*/
    	hints->ai_family = AF_INET;       // IPv4     
    	hints->ai_socktype = SOCK_STREAM; // TCP 
    	hints->ai_flags = AI_PASSIVE;     // AI_PASSIVE for server 
@@ -62,6 +68,8 @@ bool server_accept(socket_t *s, socket_t *client_s) {
 bool send_response(socket_t *client_s) {
   	bool data_sent;
   	unsigned char response[SERVER_RESPONSE_SIZE];
+
+  	// se puede hacer char response[SERVER_RESPONSE_SIZE] = "OK\n";
   	response[0] = 'O';
   	response[1] = 'K';
   	response[2] = '\n';
@@ -83,6 +91,13 @@ bool receive_message(socket_t *s, char* buffer, int size) {
 }
 
 void server_destroy(socket_t *s, socket_t *client_s) {
+	/* el server no debe conocer al cliente, 
+	se deben tener dos mains sepados uno para la parte del server
+	y otro para la parte del cliente
+	cpompilarlos y abrir dos terminales distintas para probarlo
+	usar un tda server y otro client para encapsular la responsabilidad de cada uno
+	
+	*/ 
 	socket_shutdown(client_s);
   	socket_destroy(client_s);
   	socket_shutdown(s);
