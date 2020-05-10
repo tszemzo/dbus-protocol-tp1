@@ -96,7 +96,7 @@ void server_destroy(socket_t *s, socket_t *client_s) {
 	y otro para la parte del cliente
 	cpompilarlos y abrir dos terminales distintas para probarlo
 	usar un tda server y otro client para encapsular la responsabilidad de cada uno
-	
+
 	*/ 
 	socket_shutdown(client_s);
   	socket_destroy(client_s);
@@ -105,9 +105,15 @@ void server_destroy(socket_t *s, socket_t *client_s) {
 }
 
 bool server_run(const char *service) {
-	struct addrinfo hints;
-   	struct addrinfo *server_info;
-   	socket_t s;
+	struct addrinfo hints; // parte del socket, el server no debe concerlo
+   	struct addrinfo *server_info; // parte del socket, el server no debe concerlo
+   	socket_t s; // no hay necesidad de dos socket,
+   	/*
+	crear un socket del lado del server que haga el bind, listen y accept
+	y otro del lado del cliente que solo haga el connect
+
+	* la funcion es muy larga, modelizar y que no supere las 20 lineas
+   	*/
 	socket_t client_s;
 
    	if (!set_local_address(&hints, &server_info, service)) return ERROR;

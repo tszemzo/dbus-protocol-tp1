@@ -210,7 +210,7 @@ int get_param_size(char *dest_start){
 	int size = dest_start[pos] + last_cero;
 	printf("The size of this param is: %d\n", size);
 	return size;
-};
+} //;
 
 int next_word_offset(char *content_buffer){
 	int pos = 0;
@@ -218,7 +218,7 @@ int next_word_offset(char *content_buffer){
 		pos++;
 	}
 	return pos;
-};
+} // EL PUNTO Y COMA NO Va, lo quito para poder correr el codigo; 
 
 uint32_t dbus_body_length(dbus_t *self){
 	return self->body_length;
