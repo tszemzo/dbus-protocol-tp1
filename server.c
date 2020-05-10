@@ -44,7 +44,6 @@ bool bind_and_listen(socket_t *s, struct addrinfo *server_info) {
 		printf("Error: %s\n", strerror(errno));
 		return false;
 	}
-	printf("Socket binded and ready for accept..\n");
 
 	return true;
 }
@@ -62,7 +61,7 @@ bool send_response(socket_t *client_s) {
   	unsigned char response[SERVER_RESPONSE_SIZE];
   	response[0] = 'O';
   	response[1] = 'K';
-  	response[2] = '\n';
+  	response[2] = '\0';
 
 	data_sent = socket_send(client_s, response, SERVER_RESPONSE_SIZE);
 	if(!data_sent) return false;
@@ -75,7 +74,6 @@ bool receive_message(socket_t *s, char* buffer, int size) {
  	received_bytes = 0;
  	// Leeme size bytes y storeamelos en buffer
  	socket_receive(s, buffer, size, &received_bytes);
- 	printf("RECEIVED %d\n", received_bytes);
  	if (received_bytes < 0) return false;
  	return true;
 }
@@ -101,29 +99,21 @@ bool server_run(const char *service) {
 		// This is going to be encapsulated
 		char message_buffer[METADATA_SIZE];
 		bool received = receive_message(&client_s, message_buffer, METADATA_SIZE);
-		if (!received) {
-			printf("Entro \n");
-			break;
-		}
-		int body_length = message_buffer[BODY_SIZE_POSITION];
-		int header_length = message_buffer[HEADER_SIZE_POSITION];
-		int message_id = message_buffer[ID_POSITION];
-		
-		header_length = 160;
+		if (!received) break;
 
-		// int body_length = m[4] + (m[5] << 8) + (m[6] << 16) + (m[7] << 24);
-	 //    int message_id = m[8] + (m[9] << 8) + (m[10] << 16) + (m[11] << 24);
-	 //    int header_length = m[12] + (m[13] << 8) + (m[14] << 16) + (m[15] << 24);
+		int body_length;
+		int header_length;
+		int message_id;
 
-	    printf("body length %d\n", body_length);
-		printf("header_length %d\n", header_length);
-		printf("message_id %d\n", message_id);
+		memcpy(&body_length, &message_buffer[BODY_SIZE_POSITION], 4);
+		memcpy(&header_length, &message_buffer[HEADER_SIZE_POSITION], 4);
+		memcpy(&message_id, &message_buffer[ID_POSITION], 4);
 
 		int content_size = body_length + header_length - METADATA_SIZE;
 		char content_buffer[content_size];		
 		receive_message(&client_s, content_buffer, content_size);
 
-		printf("* Id: %04d\n", message_id);
+		printf("* Id: 0x%08d\n", message_id);
 		int size = get_param_size(content_buffer);
 		int offset = 0;
 		int position = offset + METADATA_CONTENT_SIZE;

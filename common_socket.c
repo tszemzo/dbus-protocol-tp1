@@ -64,7 +64,6 @@ bool socket_receive(socket_t *self, char* buffer, size_t size,
 		}
 		accum_bytes += *received_bytes;
 	}
-	printf("Recibido %d bytes: %s\n", accum_bytes, buffer);
 	return true;
 }
 

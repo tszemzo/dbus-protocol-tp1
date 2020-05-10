@@ -75,9 +75,7 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 	return self->header;
 }
 
-void _add_lengths(dbus_t *self, uint32_t header_length, uint32_t body_length) {
-	printf("header_length %d\n", header_length);
-	printf("body_length %d\n", body_length);
+void _add_lengths(dbus_t *self, int header_length, int body_length) {
     memcpy(&self->header[4], &body_length, 4);
     memcpy(&self->header[12], &header_length, 4);
 }
@@ -168,12 +166,10 @@ void _parse_param(unsigned char *header, char *buffer, int offset,
 	// char param[offset];	
 	char *param = malloc(offset);
 	memcpy(param, buffer, offset);
-	printf("PARAM %s\n", param);
 	int pos = 0;
 	_write_metadata_param(header, pos, offset, param_type, data_type);
 	pos += METADATA_LENGTH;
 	memcpy(&header[pos], param, offset);
-	printf("HEADER{pos} %s\n", &header[pos]);
 	pos += offset;
 	header[pos] = '\0';
 	free(param);
@@ -211,7 +207,7 @@ void _set_header(dbus_t *self) {
 
 void dbus_create(dbus_t *self) {
 	(self->id) = 1;
-	memset(self->header, 0, 300);
+	memset(self->header, 0, 500);
 }
 
 int get_param_size(char *dest_start){
@@ -222,7 +218,6 @@ int get_param_size(char *dest_start){
 	pos += METADATA_PARAM_LENGTH;
 	int last_cero = 1;
 	int size = dest_start[pos] + last_cero;
-	printf("The size of this param is: %d\n", size);
 	return size;
 }
 

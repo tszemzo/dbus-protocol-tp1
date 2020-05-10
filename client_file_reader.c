@@ -26,7 +26,6 @@ void file_reader_destroy(file_reader_t *self) {
 
 char* file_reader_get_line(file_reader_t *self) {
     char *data = {0};
-    
     int read_bytes = _get_input(&data, 0, self->data);
     if (read_bytes < 0) {
         if (data != NULL) free(data);

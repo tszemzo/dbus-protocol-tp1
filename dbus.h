@@ -5,8 +5,8 @@
 typedef struct {
 	unsigned char header[500];
 	uint32_t id;
-	uint32_t header_length;
-	uint32_t body_length;
+	int header_length;
+	int body_length;
 } dbus_t;
 
 /* */
@@ -21,7 +21,7 @@ int _parse_body(unsigned char *header, char *buffer);
 int _find_begin_param(char *buffer);
 int _find_firm_params(char *buffer);
 int _align_header(unsigned char *header, int header_position);
-void _add_lengths(dbus_t *self, uint32_t header_length, uint32_t body_length);
+void _add_lengths(dbus_t *self, int header_length, int body_length);
 void _write_metadata_param(unsigned char *header, int pos, int offset, 
 	char param_type, char data_type);
 uint32_t dbus_body_length(dbus_t *self);

@@ -39,7 +39,6 @@ bool client_connect(socket_t *s, struct addrinfo *client_info) {
 		return false;
 	}
 
-	printf("Socket connected to the remote address..\n");
 	return true;
 }
 
@@ -47,18 +46,15 @@ bool send_data(socket_t *s, char *data, dbus_t *dbus) {
   	bool data_sent;
   	unsigned char *response;
   	
-	printf("Line... %s\n", data);
 	response = parse_line(dbus, data, strlen(data));
 	int header_length = dbus_header_length(dbus);
 	int body_length = dbus_body_length(dbus);
 
 	data_sent = socket_send(s, response, header_length);
 	if(!data_sent) return false;
-	printf("Data sent [Should be 1]?... %d\n", data_sent);
 
 	data_sent = socket_send(s, &response[header_length], body_length);
 	if(!data_sent) return false;
-	printf("Data sent 2 [Should be 1]?... %d\n", data_sent);
 
 	return true;	
 }
@@ -93,7 +89,6 @@ void client_run(const char *host, const char *service, char *filename) {
 	while(true) {
 		send_buffer = file_reader_get_line(&file_reader);
 		if (send_buffer == NULL) return;
-		printf("ESTE ES EL SEND BUFFER: %s\n", send_buffer);
 		int id = dbus_id(&dbus);
 		bool sent = send_data(&s, send_buffer, &dbus);
 		if (!sent) { 
@@ -101,7 +96,7 @@ void client_run(const char *host, const char *service, char *filename) {
             break;
         }
 		receive_data(&s, receive_buffer, SERVER_RESPONSE_SIZE);
-		printf("%04d: %s\n", id, receive_buffer);
+		printf("0x%08d: %s\n", id, receive_buffer);
 	}
 	client_destroy(&s);
 	file_reader_destroy(&file_reader);
