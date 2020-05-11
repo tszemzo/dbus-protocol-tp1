@@ -73,7 +73,7 @@ bool send_response(socket_t *client_s) {
   	response[0] = 'O';
   	response[1] = 'K';
   	response[2] = '\n';
-
+  	// no se hace el correcto checkeo de endianness
 	data_sent = socket_send(client_s, response, SERVER_RESPONSE_SIZE);
 	if(!data_sent) return false;
 	return true;
@@ -84,6 +84,7 @@ bool receive_message(socket_t *s, char* buffer, int size) {
  	memset(buffer, 0, size); 
  	received_bytes = 0;
  	// Leeme size bytes y storeamelos en buffer
+ 	// no se hace el correcto checkeo de endianness
  	socket_receive(s, buffer, size, &received_bytes);
  	printf("RECEIVED %d\n", received_bytes);
  	if (received_bytes < 0) return false;
