@@ -68,12 +68,11 @@ bool send_data(socket_t *s, FILE *data, dbus_t *dbus) {
 	int header_length = dbus_header_length(dbus);
 	int body_length = dbus_body_length(dbus);
 
-	// no se hace el correcto checkeo de endianness
 	data_sent = socket_send(s, response, header_length);
 	if(!data_sent) return false;
 	printf("Data sent [Should be 1]?... %d\n", data_sent);
 
-	// no se hace el correcto checkeo de endianness
+	
 	data_sent = socket_send(s, &response[header_length], body_length);
 	if(!data_sent) return false;
 	printf("Data sent 2 [Should be 1]?... %d\n", data_sent);
@@ -86,7 +85,7 @@ void receive_data(socket_t *s, char* buffer, int size) {
  	memset(buffer, 0, size); 
  	received_bytes = 0;
  	// Leeme size bytes y storeamelos en buffer
- 	// no se hace el correcto checkeo de endianness
+ 	
  	socket_receive(s, buffer, size, &received_bytes);
 }
 

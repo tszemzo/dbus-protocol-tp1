@@ -73,7 +73,6 @@ bool send_response(socket_t *client_s) {
   	response[0] = 'O';
   	response[1] = 'K';
   	response[2] = '\n';
-  	// no se hace el correcto checkeo de endianness
 	data_sent = socket_send(client_s, response, SERVER_RESPONSE_SIZE);
 	if(!data_sent) return false;
 	return true;
