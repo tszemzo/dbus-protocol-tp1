@@ -9,7 +9,6 @@ typedef struct {
 	int body_length;
 } dbus_t;
 
-/* */
 unsigned char *dbus_encode_line(dbus_t *self, char *buffer, int size);
 int dbus_decode_line(char* content_buffer, int position, char *param, int size);
 void dbus_create(dbus_t *self);

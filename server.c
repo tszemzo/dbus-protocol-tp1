@@ -10,11 +10,11 @@
 
 #define SUCCESS 0
 #define ERROR 1
-#define ACCEPT_QUEUE_LENGTH 10
 #define METADATA_SIZE 16
+#define ACCEPT_QUEUE_LENGTH 10
 #define HEADER_SIZE_POSITION 12
-#define BODY_SIZE_POSITION 4
 #define ID_POSITION 8
+#define BODY_SIZE_POSITION 4
 #define SERVER_RESPONSE_SIZE 3
 
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info,
@@ -73,6 +73,52 @@ bool receive_message(socket_t *s, char* buffer, int size) {
  	return true;
 }
 
+void decode_params(char *content_buffer, int message_id) {
+	printf("* Id: 0x%08d\n", message_id);
+
+	int position = 0;
+	int size = get_param_size(content_buffer);
+	char param[size];
+
+	position = dbus_decode_line(content_buffer, position, param, size);
+	printf("* Destino: %s\n", param);
+
+	size = get_param_size(&content_buffer[position]);
+	position = dbus_decode_line(content_buffer, position, param, size);
+	printf("* Ruta: %s\n", param);
+
+	size = get_param_size(&content_buffer[position]);
+	position = dbus_decode_line(content_buffer, position, param, size);
+	printf("* Interfaz: %s\n", param);
+
+	size = get_param_size(&content_buffer[position]);
+	position = dbus_decode_line(content_buffer, position, param, size);
+	printf("* Metodo: %s\n", param);
+}
+
+void decode_body(char *content_buffer, int header_length, int body_length) {
+	// La resta es porque el content_buffer no contempla la metadata
+	int position = header_length - METADATA_SIZE;
+	int body = body_length;
+	int size = 0;
+	// char param[size];
+	if (body > 0){
+		printf("* Parametros:\n");
+		int bytes_read = 0;
+		while(bytes_read < body) {
+			memcpy(&size, &content_buffer[position], sizeof(int));
+			// the \0 addition
+			size += 1;
+			position += sizeof(int);
+			char param[size];
+			memcpy(&param, &content_buffer[position], size);
+			position += size;			
+			bytes_read += (size + sizeof(int));
+			printf("    * %s\n", param);
+		}
+	}
+}
+
 void server_destroy(socket_t *s, socket_t *client_s) {
 	socket_shutdown(client_s);
   	socket_destroy(client_s);
@@ -91,7 +137,6 @@ bool server_run(const char *service) {
 	if (!server_accept(&s, &client_s)) return ERROR;
 
 	while(true) {
-		// This is going to be encapsulated
 		char message_buffer[METADATA_SIZE];
 		bool received = receive_message(&client_s, message_buffer, METADATA_SIZE);
 		if (!received) break;
@@ -108,43 +153,8 @@ bool server_run(const char *service) {
 		char content_buffer[content_size];		
 		receive_message(&client_s, content_buffer, content_size);
 
-		printf("* Id: 0x%08d\n", message_id);
-
-		int position = 0;
-		int size = get_param_size(content_buffer);
-		char param[size];
-
-		position = dbus_decode_line(content_buffer, position, param, size);
-		printf("* Destino: %s\n", param);
-
-		size = get_param_size(&content_buffer[position]);
-		position = dbus_decode_line(content_buffer, position, param, size);
-		printf("* Ruta: %s\n", param);
-
-		size = get_param_size(&content_buffer[position]);
-		position = dbus_decode_line(content_buffer, position, param, size);
-		printf("* Interfaz: %s\n", param);
-
-		size = get_param_size(&content_buffer[position]);
-		position = dbus_decode_line(content_buffer, position, param, size);
-		printf("* Metodo: %s\n", param);
-
-		// La resta es porque el content_buffer no contempla la metadata
-		position = header_length - METADATA_SIZE;
-		if (body_length > 0){
-			printf("* Parametros:\n");
-			int bytes_read = 0;
-			while(bytes_read < body_length) {
-				memcpy(&size, &content_buffer[position], sizeof(int));
-				// the \0 addition
-				size += 1;
-				position += sizeof(int);
-				memcpy(&param, &content_buffer[position], size);
-				position += size;			
-				bytes_read += (size + sizeof(int));
-				printf("    * %s\n", param);
-			}
-		}
+		decode_params(content_buffer, message_id);
+		decode_body(content_buffer, header_length, body_length);
 
 		if (!send_response(&client_s)) return ERROR;
 	}

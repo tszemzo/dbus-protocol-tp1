@@ -38,4 +38,10 @@ void server_destroy(socket_t *s, socket_t *client_s);
 /*Recibe un mensaje de size bytes utilizando el socket.*/ 
 bool receive_message(socket_t *s, char* buffer, int size);
 
+/*Llama al protocolo para decodificar el mensaje de los parametros de la line*/ 
+void decode_params(char *content_buffer, int message_id);
+
+/*Llama al protocolo para decodificar el body de la linea*/ 
+void decode_body(char *content_buffer, int header_length, int body_length);
+
 #endif // SERVER_H

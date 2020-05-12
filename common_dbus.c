@@ -75,7 +75,8 @@ unsigned char *dbus_encode_line(dbus_t *self, char* buffer, int size) {
 	return self->header;
 }
 
-int dbus_decode_line(char* content_buffer, int position, char* param, int size) {
+int dbus_decode_line(char* content_buffer, int position, char* param, 
+	int size) {
 	int length = position;
 	int offset = _next_word_offset(&content_buffer[length]);
 	length += offset + METADATA_LENGTH;
