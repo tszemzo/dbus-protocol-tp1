@@ -57,11 +57,7 @@ bool server_accept(socket_t *s, socket_t *client_s) {
 
 bool send_response(socket_t *client_s) {
   	bool data_sent;
-  	unsigned char response[SERVER_RESPONSE_SIZE];
-  	response[0] = 'O';
-  	response[1] = 'K';
-  	response[2] = '\0';
-
+  	unsigned char response[SERVER_RESPONSE_SIZE] = "OK\0";
 	data_sent = socket_send(client_s, response, SERVER_RESPONSE_SIZE);
 	if(!data_sent) return false;
 	return true;
@@ -118,19 +114,19 @@ bool server_run(const char *service) {
 		int size = get_param_size(content_buffer);
 		char param[size];
 
-		position = decode_line(content_buffer, position, param, size);
+		position = dbus_decode_line(content_buffer, position, param, size);
 		printf("* Destino: %s\n", param);
 
 		size = get_param_size(&content_buffer[position]);
-		position = decode_line(content_buffer, position, param, size);
+		position = dbus_decode_line(content_buffer, position, param, size);
 		printf("* Ruta: %s\n", param);
 
 		size = get_param_size(&content_buffer[position]);
-		position = decode_line(content_buffer, position, param, size);
+		position = dbus_decode_line(content_buffer, position, param, size);
 		printf("* Interfaz: %s\n", param);
 
 		size = get_param_size(&content_buffer[position]);
-		position = decode_line(content_buffer, position, param, size);
+		position = dbus_decode_line(content_buffer, position, param, size);
 		printf("* Metodo: %s\n", param);
 
 		// La resta es porque el content_buffer no contempla la metadata

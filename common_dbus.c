@@ -11,7 +11,7 @@
 #define START_OF_PARAMS 16
 #define ALIGNMENT 8
 
-unsigned char *encode_line(dbus_t *self, char* buffer, int size) {
+unsigned char *dbus_encode_line(dbus_t *self, char* buffer, int size) {
 	_set_header(self);
 	// destination
 	char param_type = '6';
@@ -75,9 +75,9 @@ unsigned char *encode_line(dbus_t *self, char* buffer, int size) {
 	return self->header;
 }
 
-int decode_line(char* content_buffer, int position, char* param, int size) {
+int dbus_decode_line(char* content_buffer, int position, char* param, int size) {
 	int length = position;
-	int offset = next_word_offset(&content_buffer[length]);
+	int offset = _next_word_offset(&content_buffer[length]);
 	length += offset + METADATA_LENGTH;
 	memcpy(param, &content_buffer[length], size);
 	length += size;
@@ -230,7 +230,7 @@ int get_param_size(char *dest_start){
 	return size;
 }
 
-int next_word_offset(char *content_buffer){
+int _next_word_offset(char *content_buffer){
 	int pos = 0;
 	while (content_buffer[pos] == '\0') {
 		pos++;
