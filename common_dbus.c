@@ -11,7 +11,7 @@
 #define START_OF_PARAMS 16
 #define ALIGNMENT 8
 
-unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
+unsigned char *encode_line(dbus_t *self, char* buffer, int size) {
 	_set_header(self);
 	// destination
 	char param_type = '6';
@@ -73,6 +73,15 @@ unsigned char *parse_line(dbus_t *self, char* buffer, int size) {
 
 	self->id += 1;
 	return self->header;
+}
+
+int decode_line(char* content_buffer, int position, char* param, int size) {
+	int length = position;
+	int offset = next_word_offset(&content_buffer[length]);
+	length += offset + METADATA_LENGTH;
+	memcpy(param, &content_buffer[length], size);
+	length += size;
+	return length;
 }
 
 void _add_lengths(dbus_t *self, int header_length, int body_length) {

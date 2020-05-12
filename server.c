@@ -16,7 +16,6 @@
 #define BODY_SIZE_POSITION 4
 #define ID_POSITION 8
 #define SERVER_RESPONSE_SIZE 3
-#define METADATA_CONTENT_SIZE 8
 
 bool set_local_address(struct addrinfo *hints, struct addrinfo **server_info,
 	const char *service) {
@@ -114,38 +113,30 @@ bool server_run(const char *service) {
 		receive_message(&client_s, content_buffer, content_size);
 
 		printf("* Id: 0x%08d\n", message_id);
+
+		int position = 0;
 		int size = get_param_size(content_buffer);
-		int offset = 0;
-		int position = offset + METADATA_CONTENT_SIZE;
 		char param[size];
-		memcpy(&param, &content_buffer[position], size);
+
+		position = decode_line(content_buffer, position, param, size);
 		printf("* Destino: %s\n", param);
-		position += size;
 
 		size = get_param_size(&content_buffer[position]);
-		offset = next_word_offset(&content_buffer[position]);
-		position += offset + METADATA_CONTENT_SIZE;
-		memcpy(&param, &content_buffer[position], size);
+		position = decode_line(content_buffer, position, param, size);
 		printf("* Ruta: %s\n", param);
-		position += size;
 
 		size = get_param_size(&content_buffer[position]);
-		offset = next_word_offset(&content_buffer[position]);
-		position += offset + METADATA_CONTENT_SIZE;
-		memcpy(&param, &content_buffer[position], size);
+		position = decode_line(content_buffer, position, param, size);
 		printf("* Interfaz: %s\n", param);
-		position += size;
 
 		size = get_param_size(&content_buffer[position]);
-		offset = next_word_offset(&content_buffer[position]);
-		position += offset + METADATA_CONTENT_SIZE;
-		memcpy(&param, &content_buffer[position], size);
+		position = decode_line(content_buffer, position, param, size);
 		printf("* Metodo: %s\n", param);
 
-		printf("* Parametros:\n");
 		// La resta es porque el content_buffer no contempla la metadata
 		position = header_length - METADATA_SIZE;
 		if (body_length > 0){
+			printf("* Parametros:\n");
 			int bytes_read = 0;
 			while(bytes_read < body_length) {
 				memcpy(&size, &content_buffer[position], sizeof(int));

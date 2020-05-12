@@ -46,7 +46,7 @@ bool send_data(socket_t *s, char *data, dbus_t *dbus) {
   	bool data_sent;
   	unsigned char *response;
   	
-	response = parse_line(dbus, data, strlen(data));
+	response = encode_line(dbus, data, strlen(data));
 	int header_length = dbus_header_length(dbus);
 	int body_length = dbus_body_length(dbus);
 
