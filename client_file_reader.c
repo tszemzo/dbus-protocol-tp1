@@ -11,7 +11,7 @@ bool file_reader_create(file_reader_t *self, char *filename) {
     if (!filename) {
         self->data = stdin;
     } else {
-        self->data = fopen(filename, "r"); 
+        self->data = fopen(filename, "r");
     }
     if (!self->data) {
         printf("Error: could not open the file");

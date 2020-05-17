@@ -78,7 +78,7 @@ void decode_params(char *content_buffer, int message_id) {
 
 	int position = 0;
 	int size = get_param_size(content_buffer);
-	char param[size];
+	char *param = malloc(size);
 
 	position = dbus_decode_line(content_buffer, position, param, size);
 	printf("* Destino: %s\n", param);
@@ -94,6 +94,8 @@ void decode_params(char *content_buffer, int message_id) {
 	size = get_param_size(&content_buffer[position]);
 	position = dbus_decode_line(content_buffer, position, param, size);
 	printf("* Metodo: %s\n", param);
+
+	free(param);
 }
 
 void decode_body(char *content_buffer, int header_length, int body_length) {
@@ -110,13 +112,15 @@ void decode_body(char *content_buffer, int header_length, int body_length) {
 			// the \0 addition
 			size += 1;
 			position += sizeof(int);
-			char param[size];
-			memcpy(&param, &content_buffer[position], size);
+			char *param = malloc(size);
+			memcpy(param, &content_buffer[position], size);
 			position += size;			
 			bytes_read += (size + sizeof(int));
-			printf("    * %s\n\n", param);
+			printf("    * %s\n", param);
+			free(param);
 		}
 	}
+	printf("\n");
 }
 
 void server_destroy(socket_t *s, socket_t *client_s) {
@@ -150,11 +154,12 @@ bool server_run(const char *service) {
 		memcpy(&message_id, &message_buffer[ID_POSITION], 4);
 
 		int content_size = body_length + header_length - METADATA_SIZE;
-		char content_buffer[content_size];		
+		char *content_buffer = malloc(content_size);
 		receive_message(&client_s, content_buffer, content_size);
 
 		decode_params(content_buffer, message_id);
 		decode_body(content_buffer, header_length, body_length);
+		free(content_buffer);
 
 		if (!send_response(&client_s)) return ERROR;
 	}

@@ -173,7 +173,6 @@ int _parse_body(unsigned char *header, char *buffer) {
 
 void _parse_param(unsigned char *header, char *buffer, int offset, 
 	char param_type, char data_type) {
-	// char param[offset];	
 	char *param = malloc(offset);
 	memcpy(param, buffer, offset);
 	int pos = 0;
