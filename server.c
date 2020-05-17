@@ -74,7 +74,7 @@ bool receive_message(socket_t *s, char* buffer, int size) {
 }
 
 void decode_params(char *content_buffer, int message_id) {
-	printf("* Id: 0x%08d\n", message_id);
+	printf("* Id: 0x%08x\n", message_id);
 
 	int position = 0;
 	int size = get_param_size(content_buffer);

@@ -96,7 +96,7 @@ void client_run(const char *host, const char *service, char *filename) {
             break;
         }
 		receive_data(&s, receive_buffer, SERVER_RESPONSE_SIZE);
-		printf("0x%08d: %s\n", id, receive_buffer);
+		printf("0x%08x: %s\n", id, receive_buffer);
 	}
 	client_destroy(&s);
 	file_reader_destroy(&file_reader);
