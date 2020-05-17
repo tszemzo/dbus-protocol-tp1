@@ -114,7 +114,7 @@ void decode_body(char *content_buffer, int header_length, int body_length) {
 			memcpy(&param, &content_buffer[position], size);
 			position += size;			
 			bytes_read += (size + sizeof(int));
-			printf("    * %s\n", param);
+			printf("    * %s\n\n", param);
 		}
 	}
 }
