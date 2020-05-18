@@ -84,14 +84,18 @@ void decode_params(char *content_buffer, int message_id) {
 	printf("* Destino: %s\n", param);
 
 	size = get_param_size(&content_buffer[position]);
+	param = realloc(param, size);
 	position = dbus_decode_line(content_buffer, position, param, size);
 	printf("* Ruta: %s\n", param);
 
 	size = get_param_size(&content_buffer[position]);
+	param = realloc(param, size);
+
 	position = dbus_decode_line(content_buffer, position, param, size);
 	printf("* Interfaz: %s\n", param);
 
 	size = get_param_size(&content_buffer[position]);
+	param = realloc(param, size);
 	position = dbus_decode_line(content_buffer, position, param, size);
 	printf("* Metodo: %s\n", param);
 
