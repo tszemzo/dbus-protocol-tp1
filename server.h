@@ -33,7 +33,7 @@ bool send_response(socket_t *client_s);
 bool server_run(const char *service);
 
 /*Destruye los sockets asociados al servidor y cierra las conexiones.*/ 
-void server_destroy(socket_t *s, socket_t *client_s);
+void server_destroy(socket_t *s);
 
 /*Recibe un mensaje de size bytes utilizando el socket.*/ 
 bool receive_message(socket_t *s, char* buffer, int size);

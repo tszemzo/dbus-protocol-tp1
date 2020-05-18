@@ -9,58 +9,58 @@
 #define METADATA_PARAM_LENGTH 4
 #define FIRM_METADATA_LENGTH 5
 #define START_OF_PARAMS 16
+#define BODY_LENGTH_POSITION 4
+#define ID_POSITION 8
+#define HEADER_LENGTH_POSITION 12
 #define ALIGNMENT 8
+#define DESTINATION_TYPE '6'
+#define ROUTE_TYPE '1'
+#define INTERFACE_TYPE '2'
+#define METHOD_TYPE '3'
+#define FIRM_TYPE '9'
+#define S_DATA_TYPE 's'
+#define O_DATA_TYPE 'o'
+#define G_DATA_TYPE 'g'
 
 unsigned char *dbus_encode_line(dbus_t *self, char* buffer, int size) {
-	_set_header(self);
-	// destination
-	char param_type = '6';
-	char data_type = 's';
+	_set_header_metadata(self);
 	int current_position = 0;
 	int offset = _find_begin_param(&buffer[current_position]);
 	_parse_param(&self->header[START_OF_PARAMS], &buffer[current_position], 
-		offset, param_type, data_type);
+		offset, DESTINATION_TYPE, S_DATA_TYPE);
 	int header_position = METADATA_LENGTH + START_OF_PARAMS + offset + 1;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
 	// route
-	param_type = '1';
-	data_type = 'o';
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
 	_parse_param(&self->header[header_position], &buffer[current_position], 
-		offset, param_type, data_type);
+		offset, ROUTE_TYPE, O_DATA_TYPE);
 	header_position = header_position + METADATA_LENGTH + offset + 1;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
 	// interface
-	param_type = '2';
-	data_type = 's';
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
 	_parse_param(&self->header[header_position], &buffer[current_position], 
-		offset, param_type, data_type);
+		offset, INTERFACE_TYPE, S_DATA_TYPE);
 	header_position = header_position + METADATA_LENGTH + offset + 1;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
 	// method
-	param_type = '3';
-	data_type = 's';
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
 	_parse_param(&self->header[header_position], &buffer[current_position], 
-		offset, param_type, data_type);
+		offset, METHOD_TYPE, S_DATA_TYPE);
 	header_position = header_position + METADATA_LENGTH + offset + 1;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
 	// firma
-	param_type = '9';
-	data_type = 'g';
 	current_position = current_position + offset + 1;
 	// saving the firm position for the body
 	int firm_position = current_position;
 	offset = _find_firm_params(&buffer[current_position]);
-	_parse_firm(&self->header[header_position], offset, param_type, data_type);
+	_parse_firm(&self->header[header_position], offset, FIRM_TYPE, G_DATA_TYPE);
 	header_position = header_position + FIRM_METADATA_LENGTH + offset;
 	header_position = _align_header(&self->header[header_position], 
 		header_position);
@@ -86,8 +86,8 @@ int dbus_decode_line(char* content_buffer, int position, char* param,
 }
 
 void _add_lengths(dbus_t *self, int header_length, int body_length) {
-    memcpy(&self->header[4], &body_length, 4);
-    memcpy(&self->header[12], &header_length, 4);
+    memcpy(&self->header[BODY_LENGTH_POSITION], &body_length, 4);
+    memcpy(&self->header[HEADER_LENGTH_POSITION], &header_length, 4);
 }
 
 int _find_begin_param(char *buffer) {
@@ -202,16 +202,16 @@ void _write_metadata_param(unsigned char *header, int pos, int offset,
 	}
 }
 
-void _set_header(dbus_t *self) {
+void _set_header_metadata(dbus_t *self) {
 	self->header[0] = 'l';
 	self->header[1] = '1';
 	self->header[2] = '0';
 	self->header[3] = '1';
 	uint32_t body_length = 0;
 	uint32_t header_length = 0;
-    memcpy(&self->header[4], &body_length, 4);
-	memcpy(&self->header[8], &self->id, 4); 
-    memcpy(&self->header[12], &header_length, 4);
+    memcpy(&self->header[BODY_LENGTH_POSITION], &body_length, 4);
+	memcpy(&self->header[ID_POSITION], &self->id, 4); 
+    memcpy(&self->header[HEADER_LENGTH_POSITION], &header_length, 4);
 }
 
 void dbus_create(dbus_t *self) {

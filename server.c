@@ -127,9 +127,7 @@ void decode_body(char *content_buffer, int header_length, int body_length) {
 	printf("\n");
 }
 
-void server_destroy(socket_t *s, socket_t *client_s) {
-	socket_shutdown(client_s);
-  	socket_destroy(client_s);
+void server_destroy(socket_t *s) {
   	socket_shutdown(s);
   	socket_destroy(s);
 }
@@ -168,6 +166,6 @@ bool server_run(const char *service) {
 		if (!send_response(&client_s)) return ERROR;
 	}
 
-	server_destroy(&s, &client_s);
+	server_destroy(&s);
 	return SUCCESS;
 }
