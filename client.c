@@ -38,7 +38,7 @@ bool client_connect(socket_t *s, struct addrinfo *client_info) {
 		socket_destroy(s);
 		return false;
 	}
-
+	freeaddrinfo(client_info);
 	return true;
 }
 
@@ -87,11 +87,12 @@ void client_run(const char *host, const char *service, char *filename) {
 	dbus_create(&dbus);
 
 	while(true) {
+		if (send_buffer != NULL) free(send_buffer);
 		send_buffer = file_reader_get_line(&file_reader);
-		if (send_buffer == NULL) return;
+		if (send_buffer == NULL) break;
 		int id = dbus_id(&dbus);
 		bool sent = send_data(&s, send_buffer, &dbus);
-		if (!sent) { 
+		if (!sent) {
             free(send_buffer);
             break;
         }
