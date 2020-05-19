@@ -23,20 +23,18 @@ Encare el problema empezando por construir mi socket, como lo fuimos viendo en c
 
 Una vez que tenía mi servidor básico funcionando y que recibía data (donde como no tenía un cliente implementado, levantaba un cliente de netcat para poder enviar mensajes), empecé por el cliente y los métodos del tda socket que me faltaban que no eran muchos… creo que send y connect. Aquí tampoco tuve mayores complicaciones, aunque al no estar acostumbrado a C, me costo un poco adaptarme al tipado estático, entre otras cosas.
 
-Luego, empecé a implementar mi módulo del protocolo, el cual si me llevo bastante tiempo, y de hecho no esta terminado aun 100%. El protocolo en sí me trajo muchas complicaciones en primer lugar porque no sabía muy bien cómo debía almacenar la tira de bytes que debía enviar, al haber distintos tipos en la misma, me confundia si debía ir haciéndolo de a partes o una “gran tira”. El approach que tomé fue de empezar por setear la parte “fija” del header que es siempre igual y fui haciéndolo byte a byte, de modo de no equivocarme, aunque el código es un poco engorroso en algunas partes.
+Luego, empecé a implementar mi módulo del protocolo, el cual si me llevo bastante tiempo. El protocolo en sí me trajo muchas complicaciones en primer lugar porque no sabía muy bien cómo debía almacenar la tira de bytes que debía enviar, al haber distintos tipos en la misma, me confundia si debía ir haciéndolo de a partes o una “gran tira”. El approach que tomé fue de empezar por setear la parte “fija” del header que es siempre igual y fui haciéndolo byte a byte, de modo de no equivocarme, aunque el código es un poco engorroso en algunas partes.
 
 Una vez que logre setear la parte fija del header, empecé a procesar lo que serian los distintos parámetros y bueno, aquí es donde hay una lógica tal vez un poco más jugosa y donde entran en juego más variables. Básicamente para cada parámetro en un orden que establece de forma arbitraria calculo su offset o largo, lo parseo agregando su metadata y luego el string correspondiente y voy avanzando mi posición actual en la tira de bytes equivalente a la metadata + el offset para pasar al proximo y asi sucesivamente.
 
-Por último, logré parsear también el body en caso de que hubiere parámetros en la firma, y poder enviarlos de a chunks. Como hago los envios y receives? Basicamente realizó un primer envío del largo del header, y un segundo envío del largo del body. Del otro lado, en el servidor, la recepción la hago, primero pidiendo 16 bytes que corresponden a la metadata de lo que quiero recibir para poder obtener el largo del body y el header, y luego pido los bytes restantes de la tira una vez obtenida esta metadata.
+Por último, logré parsear también el body en caso de que hubiere parámetros en la firma, y poder enviarlos de a chunks. 
 
-Quiero aclarar que el trabajo práctico no esta finalizado aún y que quedan por hacer algunas tareas que enunciare a continuación:
+Como hago los envios y receives? Basicamente realizó un primer envío del largo del header, y un segundo envío del largo del body. Del otro lado, en el servidor, la recepción la hago, primero pidiendo 16 bytes que corresponden a la metadata de lo que quiero recibir para poder obtener el largo del body y el header, y luego pido los bytes restantes de la tira una vez obtenida esta metadata.
 
-* Traducción y parseo del protocolo serverside
-* Utilizar memoria dinámica para almacenar la lectura del archivo
-* Agregar el stdin para la lectura de archivos en caso de que no se envíe ninguno
-* Documentar, sobretodo el módulo de dbus
-* Refactorizar, sobretodo el módulo de dbus
-* Pasar el lint y corregir en todos los archivos
+Si bien pude finalizar el TP sin leaks de memoria, con el lint corriendo bien y con todos los ejemplos de prueba funcionando, no pude terminar de hacer las correcciones que me fueron marcadas, y quedarian para una futura iteracion. Estas son:
 
-Y seguramente aparecerá algún requerimiento más que hasta ahora no visualice pero voy a estar implementandolo esta semana. De todos modos, me gustaría obtener un feedback sobre lo realizado.
+* Mejorar el socket.
+* Hacer que el servidor y el cliente sean un TDA, si bien cada uno tiene su main y corre por separado.
+* Mejorar la documentacion, sobretodo del modulo dbus.
+* Desencapsular la pequeña logica que quedo del socket en el servidor y el cliente.
  
