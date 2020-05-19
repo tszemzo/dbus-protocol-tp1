@@ -18,6 +18,10 @@ int dbus_decode_line(char* content_buffer, int position, char *param, int size);
 /*Crea el dbus seteando el id en 1.*/ 
 void dbus_create(dbus_t *self);
 
+/**/ 
+int _parse_line(dbus_t *self, char* buffer, int current_position, 
+	int header_position, int offset, char param_type, char data_type);
+
 /*Metodo privado. Agrega la metadata del header del mensaje.*/ 
 void _set_header_metadata(dbus_t *self);
 

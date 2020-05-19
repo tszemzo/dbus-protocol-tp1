@@ -24,37 +24,32 @@
 
 unsigned char *dbus_encode_line(dbus_t *self, char* buffer, int size) {
 	_set_header_metadata(self);
+
+	// destination
 	int current_position = 0;
 	int offset = _find_begin_param(&buffer[current_position]);
-	_parse_param(&self->header[START_OF_PARAMS], &buffer[current_position], 
+	int header_position = START_OF_PARAMS;
+	header_position = _parse_line(self, buffer, current_position, header_position, 
 		offset, DESTINATION_TYPE, S_DATA_TYPE);
-	int header_position = METADATA_LENGTH + START_OF_PARAMS + offset + 1;
-	header_position = _align_header(&self->header[header_position], 
-		header_position);
+
 	// route
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
-	_parse_param(&self->header[header_position], &buffer[current_position], 
+	header_position = _parse_line(self, buffer, current_position, header_position, 
 		offset, ROUTE_TYPE, O_DATA_TYPE);
-	header_position = header_position + METADATA_LENGTH + offset + 1;
-	header_position = _align_header(&self->header[header_position], 
-		header_position);
+
 	// interface
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
-	_parse_param(&self->header[header_position], &buffer[current_position], 
+	header_position = _parse_line(self, buffer, current_position, header_position, 
 		offset, INTERFACE_TYPE, S_DATA_TYPE);
-	header_position = header_position + METADATA_LENGTH + offset + 1;
-	header_position = _align_header(&self->header[header_position], 
-		header_position);
+	
 	// method
 	current_position = current_position + offset + 1;
 	offset = _find_begin_param(&buffer[current_position]);
-	_parse_param(&self->header[header_position], &buffer[current_position], 
+	header_position = _parse_line(self, buffer, current_position, header_position, 
 		offset, METHOD_TYPE, S_DATA_TYPE);
-	header_position = header_position + METADATA_LENGTH + offset + 1;
-	header_position = _align_header(&self->header[header_position], 
-		header_position);
+
 	// firma
 	current_position = current_position + offset + 1;
 	// saving the firm position for the body
@@ -83,6 +78,15 @@ int dbus_decode_line(char* content_buffer, int position, char* param,
 	memcpy(param, &content_buffer[length], size);
 	length += size;
 	return length;
+}
+
+int _parse_line(dbus_t *self, char* buffer, int current_position, 
+	int header_position, int offset, char param_type, char data_type) {
+	_parse_param(&self->header[header_position], &buffer[current_position], 
+		offset, ROUTE_TYPE, O_DATA_TYPE);
+	int pos = header_position + METADATA_LENGTH + offset + 1;
+	pos = _align_header(&self->header[pos], pos);
+	return pos;
 }
 
 void _add_lengths(dbus_t *self, int header_length, int body_length) {
